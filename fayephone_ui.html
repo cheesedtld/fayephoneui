@@ -2231,8 +2231,8 @@ el.innerHTML = `<div class="file-info"><div class="file-name">${displayBody}</di
             // user: 声纹在右，时长在左
             barHtml = `<div class="voice-bar" style="flex-direction: row-reverse; justify-content: flex-end;"><div class="voice-waves">${waves}</div><div class="voice-duration">${dur}"</div></div>`;
         } else {
-            // char: 声纹在左，时长在右
-            barHtml = `<div class="voice-bar" style="flex-direction: row; justify-content: flex-start;"><div class="voice-waves">${waves}</div><div class="voice-duration">${dur}"</div></div>`;
+            // char: 声纹在左，时长在右，整体靠右
+            barHtml = `<div class="voice-bar" style="flex-direction: row; justify-content: flex-end;"><div class="voice-waves">${waves}</div><div class="voice-duration">${dur}"</div></div>`;
         }
         el.innerHTML = `${barHtml}<div class="voice-text" style="text-align:left;word-break:break-word;white-space:normal;">${txt}</div>`;
         el.classList.remove('show-text');
@@ -2840,5 +2840,3 @@ init();
 </script>
 </body>
 </html>
-
-
