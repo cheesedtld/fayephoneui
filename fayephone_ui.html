@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>聊天界面 (适配器增强版)</title>
+<title>Faye小手机聊天界面</title>
 <!-- 引入 Google Fonts 手写字体 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,18 +16,18 @@
 --msg-time-color: #b0b0b0;
 }
 
-/* CSS样式 */
-body {
-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-display: flex;
-justify-content: center;
-align-items: center;
-margin: 0;
-background-color: transparent;
-user-select: none;
--webkit-user-select: none;
-min-height: 100vh;
-overflow: hidden;
+/* 聊天气泡样式 */
+.bubble {
+    display: inline-block;
+    padding: 10px 15px;
+    border-radius: 20px;
+    margin: 5px 0;
+    max-width: 60%;
+    word-break: break-all;
+    font-size: 16px;
+    line-height: 1.5;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 /* 手机容器 */
