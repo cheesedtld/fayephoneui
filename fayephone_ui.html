@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Faye小手机聊天界面</title>
+<title>聊天界面 (适配器增强版)</title>
 <!-- 引入 Google Fonts 手写字体 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -669,19 +669,28 @@ function postPhoneContainerSize() {
     try {
         var phone = document.getElementById('phone-container');
         if (phone && window.parent !== window) {
+            var rect = phone.getBoundingClientRect();
             window.parent.postMessage({
                 type: 'fayephone-resize',
-                width: phone.offsetWidth,
-                height: phone.offsetHeight
+                width: Math.round(rect.width),
+                height: Math.round(rect.height)
             }, '*');
         }
     } catch(e) {}
 }
 window.addEventListener('DOMContentLoaded', postPhoneContainerSize);
-// 如果用户自定义宽高后也要同步
 window.addEventListener('resize', postPhoneContainerSize);
 // 兼容设置变更后
 setInterval(postPhoneContainerSize, 1000);
+// 保存设置后也同步宽高
+window.saveHomeSettings = (function(orig){
+    return async function() {
+        if (orig) await orig.apply(this, arguments);
+        setTimeout(postPhoneContainerSize, 100);
+    }
+})(window.saveHomeSettings);
+// 用户交互后也同步
+document.addEventListener('click', function(){ setTimeout(postPhoneContainerSize, 200); });
 </script>
 </head>
 <body>
