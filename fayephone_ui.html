@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Faye小手机聊天界面</title>
+<title>聊天界面 (适配器增强版)</title>
 <!-- 引入 Google Fonts 手写字体 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +22,9 @@
     padding: 10px 15px;
     border-radius: 20px;
     margin: 5px 0;
-    max-width: 60%;
+    max-width: 210px;
+    min-width: 48px;
+    width: fit-content;
     word-break: break-all;
     font-size: 16px;
     line-height: 1.5;
@@ -350,7 +352,7 @@ text-align: left;
 
 /* 所有气泡类型的通用样式 */
 .bubble, .location-card, .transfer-card, .file-card, .voice-card, .photo-card, .sticker-bubble, .real-audio-card {
-flex-shrink: 0; cursor: pointer; position: relative; transition: transform 0.1s; max-width: 100%;
+flex-shrink: 0; cursor: pointer; position: relative; transition: transform 0.1s; max-width: 210px;
 }
 /* 按压效果 */
 .bubble.pressing, .location-card.pressing, .transfer-card.pressing, .file-card.pressing, .voice-card.pressing, .photo-card.pressing, .sticker-bubble.pressing, .real-audio-card.pressing {
@@ -390,7 +392,15 @@ font-size: 10px; color: var(--msg-time-color); line-height: 1; user-select: none
 
 /* 模拟语音卡片样式 */
 .voice-card {
-padding: 7px 10px; border-radius: 18px; display: flex; flex-direction: column; gap: 4px; min-width: 28px; position: relative;
+    padding: 7px 10px;
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 48px;
+    width: fit-content;
+    position: relative;
+    max-width: 210px;
 }
 .voice-card.sent { background: #dcd0ff; color: #000; border-top-right-radius: 0px; }
 .voice-card.received { background: #ffffff; color: #000; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05); border-top-left-radius: 0px; }
