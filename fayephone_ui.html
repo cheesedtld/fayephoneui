@@ -2829,7 +2829,12 @@ window.searchDarkWeb = searchDarkWeb;
 window.openDiary = openDiary;
 window.closeDiary = closeDiary;
 window.generateDiary = generateDiary;
-
+// === 🐛 测试专用后门 (发布时可删除) ===
+window.debugRender = renderMessageToUI;      // 暴露消息渲染函数
+window.debugDark = renderDarkSearchResults;  // 暴露暗网搜索结果渲染
+window.debugDiary = renderDiaryEntries;      // 暴露日记渲染
+window.debugSettings = () => appSettings;    // 查看当前设置
+// =======================================
 // Initialize on Load
 if (document.readyState === 'loading') {
 document.addEventListener('DOMContentLoaded', init);
@@ -2840,3 +2845,4 @@ init();
 </script>
 </body>
 </html>
+
