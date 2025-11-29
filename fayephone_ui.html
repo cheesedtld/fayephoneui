@@ -486,12 +486,13 @@ font-weight: bold;
     /* 减小输入框与上边缘间隙 */
     padding-bottom: 10px;
     transition: background-color 0.3s;
+
 }
 #input-bar textarea {
-    margin-top:  5px;
+    margin-top: 5px;
     flex: 1; border: none; border-radius: 15px; padding: 8px 10px;
     font-size: 15px; resize: none; max-height: 80px; outline: none; min-height: 20px;
-    background: rgba(245, 245, 245, 0.9); color: #0000;
+    background: rgba(245, 245, 245, 0.9); color: #000;
     margin-right: 4px;
     scrollbar-width: none; /* Firefox */
     overflow-y: auto;
@@ -1001,19 +1002,12 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 </div>
 </div>
 </div>
-
 <script>
 (function() {
-// 宏变量声明，供加载器自动替换
-const charName = '{{char}}';
-const userName = '{{user}}';
-const userAvatarPath = '{{userAvatarPath}}';
-const charAvatarPath = '{{charAvatarPath}}';
-
 // Global Variables
 const defaultAppSettings = {
-charBubble: '#FFC9CB', charText: '#474747', charAvatar: charAvatarPath,
-userBubble: '#FFA8AC', userText: '#5C5C5C', userAvatar: userAvatarPath,
+charBubble: '#FFC9CB', charText: '#474747', charAvatar: '',
+userBubble: '#FFA8AC', userText: '#5C5C5C',
 chatBg: 'https://file.zhuyitai.com/feedback/202511/22/96c39311d8df6d1d6a89984630585a70.jpeg', chatBgIsDark: false,
 homeBg: 'https://intellcs.sinosafe.com.cn/immessage/api/v1/message/attachment/download?groupName=group1&authorization=EnAfMjUzaQVz&fileName=M00/00/A7/CgND1WkhtDSADV5WAANPQ4JuHoI63.jpeg', homeBgIsDark: false,
 iconBg: '#003673', iconColor: '#00885A',
@@ -1031,6 +1025,9 @@ blockChar: false, // User blocks Char
 blockUser: false, // Char blocks User
 };
 let appSettings = { ...defaultAppSettings };
+
+// 头像路径变量（由加载器注入）
+window.userAvatarPath = window.userAvatarPath || '';
 
 let myStickerList = [];
 const defaultStickerList = [
@@ -1748,7 +1745,7 @@ document.getElementById('set-char-text').value = appSettings.charText;
 document.getElementById('set-user-bubble').value = appSettings.userBubble;
 document.getElementById('set-user-text').value = appSettings.userText;
 document.getElementById('preview-char-avatar').src = appSettings.charAvatar;
-document.getElementById('preview-user-avatar').src = appSettings.userAvatar;
+    document.getElementById('preview-user-avatar').src = window.userAvatarPath;
 document.getElementById('preview-chat-bg').src = appSettings.chatBg || '';
 document.getElementById('set-interface-color').value = appSettings.interfaceColor || '#f7f7f7';
 document.getElementById('set-msg-name-color').value = appSettings.msgNameColor || '#999999';
@@ -1775,8 +1772,7 @@ appSettings.blockUser = document.getElementById('set-block-user').checked;
 
 const charAvatarUrl = document.getElementById('preview-char-avatar').src;
 if (charAvatarUrl) appSettings.charAvatar = charAvatarUrl;
-const userAvatarUrl = document.getElementById('preview-user-avatar').src;
-if (userAvatarUrl) appSettings.userAvatar = userAvatarUrl;
+// 用户头像直接用 window.userAvatarPath，不再存储到 appSettings
 const chatBgUrl = document.getElementById('preview-chat-bg').src;
 if (chatBgUrl && chatBgUrl !== window.location.href) {
 appSettings.chatBg = chatBgUrl;
@@ -2149,7 +2145,7 @@ if (msg.body && typeof msg.body === 'string') {
     }
 }
 
-const avatar = document.createElement('img'); avatar.className = 'avatar'; avatar.src = msg.isUser ? appSettings.userAvatar : appSettings.charAvatar;
+const avatar = document.createElement('img'); avatar.className = 'avatar'; avatar.src = msg.isUser ? window.userAvatarPath : appSettings.charAvatar;
 
 const container = document.createElement('div'); container.className = 'msg-container';
 const nameEl = document.createElement('div'); nameEl.className = 'msg-name';
@@ -2753,7 +2749,7 @@ if (settingsFileInput) {
                         const preview = document.getElementById('preview-char-avatar');
                         if(preview) preview.src = url;
                     } else if (currentSettingsUploadType === 'user-avatar') {
-                        appSettings.userAvatar = url;
+                        window.userAvatarPath = url;
                         const preview = document.getElementById('preview-user-avatar');
                         if(preview) preview.src = url;
                     } else if (currentSettingsUploadType === 'chat-bg') {
@@ -2808,7 +2804,7 @@ const savedStickers = localStorage.getItem('st-phone-stickers');
 myStickerList = savedStickers ? JSON.parse(savedStickers) : defaultStickerList;
 const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2IwYjBiMCI+PHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZjJmMmYyIi8+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OS00IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==';
 if(!appSettings.charAvatar) appSettings.charAvatar = defaultAvatar;
-if(!appSettings.userAvatar) appSettings.userAvatar = defaultAvatar;
+if(!window.userAvatarPath) window.userAvatarPath = defaultAvatar;
 applySettings();
 if(headerTitle) headerTitle.textContent = window.charName || '{{char}}';
 updateClock();
