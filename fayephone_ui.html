@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>聊天界面 (适配器增强版)</title>
+<title>faye小手机</title>
 <!-- 引入 Google Fonts 手写字体 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -486,7 +486,6 @@ font-weight: bold;
     /* 减小输入框与上边缘间隙 */
     padding-bottom: 10px;
     transition: background-color 0.3s;
-
 }
 #input-bar textarea {
     margin-top: 5px;
@@ -1007,7 +1006,7 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 // Global Variables
 const defaultAppSettings = {
 charBubble: '#FFC9CB', charText: '#474747', charAvatar: '',
-userBubble: '#FFA8AC', userText: '#5C5C5C',
+userBubble: '#FFA8AC', userText: '#5C5C5C', userAvatar: '',
 chatBg: 'https://file.zhuyitai.com/feedback/202511/22/96c39311d8df6d1d6a89984630585a70.jpeg', chatBgIsDark: false,
 homeBg: 'https://intellcs.sinosafe.com.cn/immessage/api/v1/message/attachment/download?groupName=group1&authorization=EnAfMjUzaQVz&fileName=M00/00/A7/CgND1WkhtDSADV5WAANPQ4JuHoI63.jpeg', homeBgIsDark: false,
 iconBg: '#003673', iconColor: '#00885A',
@@ -1025,9 +1024,6 @@ blockChar: false, // User blocks Char
 blockUser: false, // Char blocks User
 };
 let appSettings = { ...defaultAppSettings };
-
-// 头像路径变量（由加载器注入）
-window.userAvatarPath = window.userAvatarPath || '';
 
 let myStickerList = [];
 const defaultStickerList = [
@@ -1151,6 +1147,7 @@ function openDiary() {
 function closeDiary() {
     if(diaryScreen) diaryScreen.classList.remove('visible');
     if(homeScreen) homeScreen.classList.remove('slide-out');
+    updateStatusBar('home');
     updateStatusBar('home');
 }
 
@@ -1745,7 +1742,7 @@ document.getElementById('set-char-text').value = appSettings.charText;
 document.getElementById('set-user-bubble').value = appSettings.userBubble;
 document.getElementById('set-user-text').value = appSettings.userText;
 document.getElementById('preview-char-avatar').src = appSettings.charAvatar;
-    document.getElementById('preview-user-avatar').src = window.userAvatarPath;
+document.getElementById('preview-user-avatar').src = appSettings.userAvatar;
 document.getElementById('preview-chat-bg').src = appSettings.chatBg || '';
 document.getElementById('set-interface-color').value = appSettings.interfaceColor || '#f7f7f7';
 document.getElementById('set-msg-name-color').value = appSettings.msgNameColor || '#999999';
@@ -1772,7 +1769,8 @@ appSettings.blockUser = document.getElementById('set-block-user').checked;
 
 const charAvatarUrl = document.getElementById('preview-char-avatar').src;
 if (charAvatarUrl) appSettings.charAvatar = charAvatarUrl;
-// 用户头像直接用 window.userAvatarPath，不再存储到 appSettings
+const userAvatarUrl = document.getElementById('preview-user-avatar').src;
+if (userAvatarUrl) appSettings.userAvatar = userAvatarUrl;
 const chatBgUrl = document.getElementById('preview-chat-bg').src;
 if (chatBgUrl && chatBgUrl !== window.location.href) {
 appSettings.chatBg = chatBgUrl;
@@ -2041,9 +2039,10 @@ if (text) {
 } 
 
 // 3. 触发回复逻辑
-// 修改逻辑：只有当既没有发送文件，也没有输入文字时（即纯粹的空输入触发），才调用 generate 触发 AI 回复。
-// 发送文件本身被视为“有效输入”，不应被当作“空消息”来触发默认的AI续写行为。
-if (typeof generate !== 'undefined' && !text && !fileSent) {
+// 修改逻辑：确保发送任何内容（文本或文件）后都触发AI生成。
+// 之前版本可能禁用了文本自动回复导致用户困惑，或因重复监听导致双重回复。
+// 现已修复监听器逻辑，故恢复标准生成逻辑。
+if (typeof generate !== 'undefined') {
     // 稍作延迟，确保DOM和History更新完毕
     setTimeout(() => {
         showTypingIndicator(); 
@@ -2145,7 +2144,7 @@ if (msg.body && typeof msg.body === 'string') {
     }
 }
 
-const avatar = document.createElement('img'); avatar.className = 'avatar'; avatar.src = msg.isUser ? window.userAvatarPath : appSettings.charAvatar;
+const avatar = document.createElement('img'); avatar.className = 'avatar'; avatar.src = msg.isUser ? appSettings.userAvatar : appSettings.charAvatar;
 
 const container = document.createElement('div'); container.className = 'msg-container';
 const nameEl = document.createElement('div'); nameEl.className = 'msg-name';
@@ -2388,50 +2387,54 @@ await setChatMessages([{ message_id: getCurrentMessageId(), message: fh }], { re
 
 if (typeof eventOn !== 'undefined') {
 const removeTyping = () => { const tb = document.getElementById('typing-bubble'); if (tb) tb.remove(); };
+
 eventOn(iframe_events.GENERATION_ENDED, (resp) => {
-removeTyping();
-let rt = typeof resp === 'string' ? resp : (resp.text || '');
+    removeTyping();
+    let rt = typeof resp === 'string' ? resp : (resp.text || '');
 
-// NEW: 处理暗网搜索结果
-if (isWaitingForDarkSearch) {
-    isWaitingForDarkSearch = false;
-    renderDarkSearchResults(rt);
-    // 尝试从聊天历史中删除该条消息
-    if (window.parent && window.parent.__fayePhoneSupport_deleteLastMessage) {
-        window.parent.__fayePhoneSupport_deleteLastMessage(rt);
+    // 1. 处理特殊模式 (暗网/日记) - 优先处理并返回，避免渲染到聊天窗口
+    if (isWaitingForDarkSearch) {
+        isWaitingForDarkSearch = false;
+        renderDarkSearchResults(rt);
+        // 尝试从聊天历史中删除该条消息
+        if (window.parent && window.parent.__fayePhoneSupport_deleteLastMessage) {
+            // 传入完整内容进行匹配验证，防止误删
+            window.parent.__fayePhoneSupport_deleteLastMessage(rt);
+        }
+        return;
     }
-    return;
-}
 
-// NEW: Handle Diary Generation
-if (isWaitingForDiary) {
-    isWaitingForDiary = false;
-    renderDiaryEntries(rt);
-    // 尝试从聊天历史中删除该条消息
-    if (window.parent && window.parent.__fayePhoneSupport_deleteLastMessage) {
-        window.parent.__fayePhoneSupport_deleteLastMessage(rt);
+    if (isWaitingForDiary) {
+        isWaitingForDiary = false;
+        renderDiaryEntries(rt);
+        // 尝试从聊天历史中删除该条消息
+        if (window.parent && window.parent.__fayePhoneSupport_deleteLastMessage) {
+            // 传入完整内容进行匹配验证，防止误删
+            window.parent.__fayePhoneSupport_deleteLastMessage(rt);
+        }
+        return;
     }
-    return;
-}
 
-// 检查是否包含拉黑指令
-if (rt.includes('[拉黑用户]')) {
-    appSettings.blockUser = true;
-    saveSettingsToStorage();
-}
-if (rt.includes('[解除拉黑]')) {
-    appSettings.blockUser = false;
-    saveSettingsToStorage();
-}
+    // 2. 处理拉黑指令 (仅更新状态)
+    if (rt.includes('[拉黑用户]')) {
+        appSettings.blockUser = true;
+        saveSettingsToStorage();
+    }
+    if (rt.includes('[解除拉黑]')) {
+        appSettings.blockUser = false;
+        saveSettingsToStorage();
+    }
 
-// Filter out <riji> blocks just in case they leaked into normal chat
-rt = rt.replace(/<riji:.*?>[\s\S]*?<\/riji:.*?>/gi, '').replace(/<jilu:.*?>[\s\S]*?<\/jilu:.*?>/gi, '').trim();
+    // 3. 处理常规聊天消息
+    // Filter out <riji> blocks just in case they leaked into normal chat
+    rt = rt.replace(/<riji:.*?>[\s\S]*?<\/riji:.*?>/gi, '').replace(/<jilu:.*?>[\s\S]*?<\/jilu:.*?>/gi, '').trim();
+    rt = rt.replace(/<fphone>|<\/fphone>|<\/?chat(:.*?)?>/gi, '').trim();
 
-rt = rt.replace(/<fphone>|<\/fphone>|<\/?chat(:.*?)?>/gi, '').trim();
-// 过滤掉 AI 生成结果中可能包含的用户消息，防止重复显示
-parseMessages(rt).filter(msg => !msg.isUser).forEach(msg => renderMessageToUI(msg)); 
-rebuildAndSaveHistory().then(() => renderMessageList());
+    // 过滤掉 AI 生成结果中可能包含的用户消息，防止重复显示
+    parseMessages(rt).filter(msg => !msg.isUser).forEach(msg => renderMessageToUI(msg)); 
+    rebuildAndSaveHistory().then(() => renderMessageList());
 });
+
 eventOn(iframe_events.GENERATION_STOPPED, removeTyping);
 } else {
 // 如果 eventOn 不可用（例如在某些旧版或特殊环境中），使用 MutationObserver 监听 body 变化作为替代
@@ -2532,47 +2535,7 @@ if (lastUploadedImageForAI) {
 generate(genParams);
 }
 
-// 监听 AI 回复，解析拉黑指令
-if (typeof eventOn !== 'undefined') {
-    eventOn(iframe_events.GENERATION_ENDED, (resp) => {
-        let rt = typeof resp === 'string' ? resp : (resp.text || '');
-        
-        // NEW: 处理暗网搜索结果
-        if (isWaitingForDarkSearch) {
-            isWaitingForDarkSearch = false;
-            renderDarkSearchResults(rt);
-            // 尝试从聊天历史中删除该条消息
-            if (window.parent && window.parent.__fayePhoneSupport_deleteLastMessage) {
-                // 传入完整内容进行匹配验证，防止误删
-                window.parent.__fayePhoneSupport_deleteLastMessage(rt);
-            }
-            return;
-        }
-
-        // NEW: Handle Diary Generation
-        if (isWaitingForDiary) {
-            isWaitingForDiary = false;
-            renderDiaryEntries(rt);
-            // 尝试从聊天历史中删除该条消息
-            if (window.parent && window.parent.__fayePhoneSupport_deleteLastMessage) {
-                // 传入完整内容进行匹配验证，防止误删
-                window.parent.__fayePhoneSupport_deleteLastMessage(rt);
-            }
-            return;
-        }
-
-        // 检查是否包含拉黑指令
-        if (rt.includes('[拉黑用户]')) {
-            appSettings.blockUser = true;
-            saveSettingsToStorage();
-            // 可以在这里添加一个 Toast 提示或者刷新设置界面
-        }
-        if (rt.includes('[解除拉黑]')) {
-            appSettings.blockUser = false;
-            saveSettingsToStorage();
-        }
-    });
-}
+// 移除之前重复的监听器逻辑，所有处理已合并至上方的主 eventOn(iframe_events.GENERATION_ENDED) 中
 
 function showTypingIndicator() {
 const row = document.createElement('div'); row.id = 'typing-bubble'; row.className = 'message-row received';
@@ -2749,7 +2712,7 @@ if (settingsFileInput) {
                         const preview = document.getElementById('preview-char-avatar');
                         if(preview) preview.src = url;
                     } else if (currentSettingsUploadType === 'user-avatar') {
-                        window.userAvatarPath = url;
+                        appSettings.userAvatar = url;
                         const preview = document.getElementById('preview-user-avatar');
                         if(preview) preview.src = url;
                     } else if (currentSettingsUploadType === 'chat-bg') {
@@ -2804,7 +2767,7 @@ const savedStickers = localStorage.getItem('st-phone-stickers');
 myStickerList = savedStickers ? JSON.parse(savedStickers) : defaultStickerList;
 const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2IwYjBiMCI+PHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZjJmMmYyIi8+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OS00IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==';
 if(!appSettings.charAvatar) appSettings.charAvatar = defaultAvatar;
-if(!window.userAvatarPath) window.userAvatarPath = defaultAvatar;
+if(!appSettings.userAvatar) appSettings.userAvatar = defaultAvatar;
 applySettings();
 if(headerTitle) headerTitle.textContent = window.charName || '{{char}}';
 updateClock();
