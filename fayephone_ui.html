@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>faye小手机</title>
+<title>聊天界面 (适配器增强版)</title>
 <!-- 引入 Google Fonts 手写字体 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -445,7 +445,7 @@ max-width: 100%; height: 32px;
 /* 文件卡片 */
 .file-card { background: white; border-radius: 6px; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 10px; border: 1px solid #eee; }
 .file-info { flex: 1; overflow: hidden; }
-.file-name { font-size: 13px; color: #333; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; word-break: break-all; }
+.file-name { font-size: 13px; color: #333; font-weight: 500; display: -webkit-box; -webk-it-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; word-break: break-all; }
 .file-size { font-size: 9px; color: #999; margin-top: 3px; }
 .file-icon { width: 34px; height: 34px; flex-shrink: 0; }
 .file-icon svg { width: 100%; height: 100%; fill: #ddd; }
@@ -487,7 +487,7 @@ font-weight: bold;
     padding-bottom: 10px;
     transition: background-color 0.3s;
 }
-#input-bar textarea {
+#input-bar textarea {  
     margin-top: 5px;
     flex: 1; border: none; border-radius: 15px; padding: 8px 10px;
     font-size: 15px; resize: none; max-height: 80px; outline: none; min-height: 20px;
@@ -2449,7 +2449,10 @@ for (const l of lines) {
 const tr = l.trim(); if (!tr) continue; if (dr.test(tr)) { res.push({ type: 'date', body: tr }); continue; }
 const m = tr.match(hr);
 if (m) {
-const hc = m[2] || m[3];
+    const hc = m[2] || m[3];
+    const userName = (window.userName && window.userName !== '{{user}}') ? window.userName : '{{user}}';
+    // Normalize header: replace literal 'User' or '{{user}}' token with actual userName for detection
+    const hcNorm = (hc || '').replace(/^User\b/, userName).replace(/\{\{user\}\}/g, userName);
 // 使用原始完整 Header (m[0]) 包含括号，以便保留历史记录中的【】格式
 const fullHeader = m[0]; 
 let b = tr.substring(m[0].length).trim();
@@ -2460,7 +2463,7 @@ let type = 'text';
 if (hc.includes('位置')) type = 'location'; else if (hc.includes('转账')) type = 'transfer'; else if (hc.includes('文件')) type = 'file'; else if (hc.includes('语音')) type = 'voice'; else if (hc.includes('图片')) type = 'photo';
 else if (hc.includes('表情包')) type = 'sticker';
 // Determine if message is from user or char based on header content
-const isUser = hc.startsWith('User') || hc.includes(window.userName || '{{user}}');
+    const isUser = (hcNorm && (hcNorm.startsWith(userName) || hcNorm.includes(userName)));
 res.push({ header: fullHeader, body: b, type: type, thought: thought, isUser: isUser });
 } else res.push({ header: `${cn}|${getTime()}`, body: tr, type: 'text', isUser: false });
 }
