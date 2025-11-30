@@ -353,10 +353,26 @@ input:checked + .slider:before { transform: translateX(20px); }
 .love-heart {
     position: absolute; bottom: -20px; font-size: 24px; animation: floatUp 4s ease-in-out forwards; opacity: 0;
 }
+/* Typing indicator without avatar: make bubble align like received messages */
+.typing-only { margin-left: 42px; border-radius: 12px; }
+
+/* Group badge near name: 5px spacing and slight upward offset */
+.group-badge { font-size:10px; color:#999; background:#f0f0f0; padding:1px 4px; border-radius:4px; margin-left:5px; position:relative; top:-1px; }
 @keyframes floatUp {
     0% { transform: translateY(0) scale(0.5); opacity: 0; }
     10% { opacity: 1; }
     100% { transform: translateY(-600px) scale(1.5); opacity: 0; }
+}
+
+/* Group input button styles */
+.group-add-btn, .group-remove-btn {
+    transition: background 0.12s ease, transform 0.08s ease;
+}
+.group-add-btn:hover, .group-remove-btn:hover {
+    background: rgba(0,0,0,0.03);
+}
+.group-add-btn:active, .group-remove-btn:active {
+    transform: scale(0.96);
 }
 
 /* 消息行容器：包含头像、消息内容、时间等 */
@@ -369,7 +385,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 .avatar { width: 38px; height: 38px; border-radius: 6px; background-color: #e0e0e0; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.05); margin-top: 0; }
 
 /* 消息内容容器：包含名字、气泡、心声等 */
-.msg-container { display: flex; flex-direction: column; max-width: calc(var(--phone-width-px, 330px) * 0.58); }
+.msg-container { display: flex; flex-direction: column; max-width: calc(var(--phone-width-px, 330px) * 0.65); }
 .message-row.sent .msg-container { align-items: flex-end; }
 .message-row.received .msg-container { align-items: flex-start; }
 
@@ -985,7 +1001,7 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 </div>
 <div id="add-contact-group-section" style="display:none">
 <input type="text" id="group-name-input" class="modal-input" placeholder="群聊名称" style="margin-bottom:8px;">
-<input type="number" id="group-count" class="modal-input" placeholder="人数 (至少2人)" min="2" oninput="renderGroupInputs()">
+<!-- 人数输入已移除，改为动态添加名字行 -->
 <div class="setting-row" style="padding: 10px 0; border: none; display: flex; justify-content: space-between; align-items: center;">
     <label style="font-size: 14px; color: #666;">我加入群聊</label> 
     <label class="switch">
@@ -993,6 +1009,7 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
         <span class="slider round"></span>
     </label>
 </div>
+<div style="font-size:12px;color:#888;margin-bottom:8px;">提示：如果头像列表中没有 <code>{{user}}</code>，则表示你不在该群里；开启“我加入群聊”会把你加入成员列表。</div>
 <div id="group-names-container"></div>
 </div>
 <div class="modal-actions">
@@ -1143,10 +1160,21 @@ function openAddContactModal() {
         document.getElementById('new-contact-name').value = '';
         document.getElementById('group-count').value = '';
         document.getElementById('group-name-input').value = '';
-        document.getElementById('group-names-container').innerHTML = '';
-        // Reset toggle
+        const gnc = document.getElementById('group-names-container');
+        if (gnc) { gnc.innerHTML = ''; addGroupNameRow(gnc, false, '', false); }
+        // Reset toggle: 如果头像列表包含当前用户，则默认表示你已在群里
         const toggle = document.getElementById('group-join-toggle');
-        if(toggle) toggle.checked = false;
+        if (toggle) {
+            try {
+                const myName = window.userName || '{{user}}';
+                let present = false;
+                if (appSettings.memberAvatars) {
+                    // memberAvatars keys are member names
+                    present = Object.prototype.hasOwnProperty.call(appSettings.memberAvatars, myName) || Object.prototype.hasOwnProperty.call(appSettings.memberAvatars, '{{user}}');
+                }
+                toggle.checked = !!present;
+            } catch (e) { toggle.checked = false; }
+        }
     }
 }
 
@@ -1169,23 +1197,89 @@ function switchContactTab(type) {
         tabs[1].classList.add('active');
         privateSection.style.display = 'none';
         groupSection.style.display = 'block';
+        // Ensure at least one name input row is present
+        try { renderGroupInputs(); } catch(e) {}
     }
 }
 
 function renderGroupInputs() {
-    const count = parseInt(document.getElementById('group-count').value) || 0;
     const container = document.getElementById('group-names-container');
-    container.innerHTML = '';
-    
-    if(count > 0 && count <= 20) {
-        for(let i = 0; i < count; i++) {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'modal-input group-input-item';
-            input.placeholder = `成员 ${i + 1} 名字`;
-            container.appendChild(input);
-        }
+    if (!container) return;
+    // 如果为空，初始化一行输入
+    if (container.children.length === 0) {
+        // 首行不可删除（没有减号）
+        addGroupNameRow(container, true, '', false);
     }
+}
+
+function addGroupNameRow(container, focus=false, value='', removable=true) {
+    const row = document.createElement('div');
+    row.className = 'group-name-row';
+    row.style.display = 'flex';
+    // 垂直居中对齐，减小间距，让按钮更靠近输入框
+    row.style.alignItems = 'center';
+    row.style.gap = '6px';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'modal-input group-input-item';
+    input.placeholder = `成员 名字`;
+    input.value = value || '';
+    input.style.flex = '1';
+    input.style.minWidth = '0';
+    input.style.boxSizing = 'border-box';
+
+    const btnAdd = document.createElement('button');
+    btnAdd.type = 'button';
+    btnAdd.className = 'modal-btn group-add-btn';
+    btnAdd.textContent = '+';
+    // 更小、更紧凑的样式
+    btnAdd.style.width = '30px';
+    btnAdd.style.height = '28px';
+    btnAdd.style.padding = '2px';
+    btnAdd.style.fontSize = '14px';
+    btnAdd.style.background = 'transparent';
+    btnAdd.style.border = 'none';
+    btnAdd.style.cursor = 'pointer';
+    btnAdd.style.display = 'inline-flex';
+    btnAdd.style.alignItems = 'center';
+    btnAdd.style.justifyContent = 'center';
+    btnAdd.style.borderRadius = '6px';
+    btnAdd.onclick = (e) => { e.preventDefault(); addGroupNameRow(container, true, '', true); };
+
+    row.appendChild(input);
+    row.appendChild(btnAdd);
+    // 如果可移除，则添加减号按钮；首行 removable=false 时不添加
+    // 按钮尺寸统一，首行如果不可删除则插入占位元素保证输入框宽度一致
+    if (removable) {
+        const btnRemove = document.createElement('button');
+        btnRemove.type = 'button';
+        btnRemove.className = 'modal-btn group-remove-btn';
+        btnRemove.textContent = '−';
+        btnRemove.style.width = '30px';
+        btnRemove.style.height = '28px';
+        btnRemove.style.padding = '2px';
+        btnRemove.style.fontSize = '14px';
+        btnRemove.style.background = 'transparent';
+        btnRemove.style.border = 'none';
+        btnRemove.style.cursor = 'pointer';
+        btnRemove.style.display = 'inline-flex';
+        btnRemove.style.alignItems = 'center';
+        btnRemove.style.justifyContent = 'center';
+        btnRemove.style.borderRadius = '6px';
+        btnRemove.onclick = (e) => { e.preventDefault(); if (row.parentNode) row.parentNode.removeChild(row); };
+        row.appendChild(btnRemove);
+    } else {
+        // 插入一个占位宽度，与删除按钮宽度一致，保证输入框长度相同
+        const spacer = document.createElement('div');
+        spacer.style.width = '30px';
+        spacer.style.height = '28px';
+        spacer.style.display = 'inline-block';
+        row.appendChild(spacer);
+    }
+    container.appendChild(row);
+
+    if (focus) input.focus();
 }
 
 function confirmAddContact() {
@@ -1225,20 +1319,20 @@ function confirmAddContact() {
             return;
         }
         
-        // 保存群组信息 (可选，主要用于备份成员列表，实际聊天记录靠标签隔离)
+        // 保存群组信息 (用于备份成员列表，匹配以群名为准)
         if (!appSettings.groups) appSettings.groups = [];
-        // 检查是否已存在同名群组
-        if (!appSettings.groups.find(g => g.name === groupName)) {
-            appSettings.groups.push({
-                name: groupName,
-                members: names
-            });
-            saveSettingsToStorage();
+        const existing = appSettings.groups.find(g => g.name === groupName);
+        if (!existing) {
+            appSettings.groups.push({ name: groupName, members: names });
+        } else {
+            // 更新成员列表
+            existing.members = names;
         }
-        
+        saveSettingsToStorage();
+
         targetName = groupName;
-        // 构造群聊标签: group:群名人数人
-        targetTag = `group:${groupName}${names.length}人`;
+        // 构造群聊标签: 不再包含人数
+        targetTag = `group:${groupName}`;
         
     } else {
         // 私聊逻辑
@@ -1606,7 +1700,7 @@ const conversations = {};
 // 2.1 从 appSettings 加载预设群组 (确保即时没有消息也显示)
 if (appSettings.groups && Array.isArray(appSettings.groups)) {
     appSettings.groups.forEach(group => {
-        const key = `group:${group.name}${group.members.length}人`;
+        const key = `group:${group.name}`;
         // 优先显示自定义群聊头像
         let groupAvatar = (appSettings.groupAvatars && appSettings.groupAvatars[key])
             ? appSettings.groupAvatars[key]
@@ -1658,7 +1752,7 @@ if (!conversations[defaultCharKey]) {
 
 // 2.4 遍历历史记录中的所有会话，合并/更新信息
 chatsMap.forEach((content, key) => {
-    // key 格式: "chat:Name" 或 "group:NameCount"
+    // key 格式: "chat:Name" 或 "group:Name"
     const [type, ...nameParts] = key.split(':');
     const nameId = nameParts.join(':'); // 防止名字里有冒号
     
@@ -1748,7 +1842,7 @@ Object.values(conversations).forEach(chat => {
         <img class="message-list-avatar" src="${displayAvatar}">
         <div class="message-list-info">
             <div class="message-list-top">
-                <span class="message-list-name">${displayName} ${chat.isGroup ? '<span style="font-size:10px;color:#999;background:#f0f0f0;padding:1px 4px;border-radius:4px;">群</span>' : ''}</span>
+                <span class="message-list-name">${displayName} ${chat.isGroup ? '<span class="group-badge">群</span>' : ''}</span>
                 <span class="message-list-time">${chat.lastTime || getTime()}</span>
             </div>
             <div class="message-list-preview">${chat.lastMsg}</div>
@@ -2151,7 +2245,7 @@ function renderAvatarSettings() {
     if (isGroup) {
         // Group Logic
         const tag = currentChatTag;
-        const groupInfo = appSettings.groups ? appSettings.groups.find(g => `group:${g.name}${g.members.length}人` === tag) : null;
+        const groupInfo = appSettings.groups ? appSettings.groups.find(g => `group:${g.name}` === tag) : null;
         if (groupInfo) {
             groupInfo.members.forEach(m => {
                 const isMe = (m === myName || m === '{{user}}' || m === 'User' || m === '我');
@@ -2186,7 +2280,7 @@ function renderAvatarSettings() {
         img.id = safeId;
         const label = document.createElement('span');
         label.className = 'avatar-name';
-        label.textContent = m.isMe ? '我' : m.name;
+        label.textContent = m.isMe ? '{{user}}' : m.name;
         item.appendChild(img);
         item.appendChild(label);
         container.appendChild(item);
@@ -2212,6 +2306,8 @@ document.getElementById('set-block-user').checked = appSettings.blockUser || fal
 
 // Render the dynamic avatar grid
 renderAvatarSettings();
+
+    // 不再在聊天设置中显示“修改群名”按钮（功能已移除）
 
 // 切换到设置页面
 if(chatSettingsScreen) chatSettingsScreen.style.display = 'flex';
@@ -2258,9 +2354,10 @@ async function deleteCurrentChat() {
             appSettings.privateChats = appSettings.privateChats.filter(n => n !== name);
         }
     } else if (currentChatTag.startsWith('group:')) {
-        // 群聊: tag is "group:NameCount人"
+        // 群聊: tag is "group:Name"
         if (appSettings.groups) {
-             appSettings.groups = appSettings.groups.filter(g => `group:${g.name}${g.members.length}人` !== currentChatTag);
+             const groupName = currentChatTag.replace(/^group:/, '');
+             appSettings.groups = appSettings.groups.filter(g => g.name !== groupName);
         }
     }
     saveSettingsToStorage();
@@ -2540,8 +2637,8 @@ if (text) {
     await rebuildAndSaveHistory();
 } 
 
-// 3. 触发AI回复逻辑：只有输入框为空且无文件时才触发AI
-if (!text && !pendingFile && typeof generate !== 'undefined') {
+// 3. 触发AI回复逻辑：只有输入框为空且本次没有发送文件时才触发AI
+if (!text && !fileSent && typeof generate !== 'undefined') {
     // 稍作延迟，确保DOM和History更新完毕
     setTimeout(() => {
         showTypingIndicator(); 
@@ -3104,6 +3201,29 @@ if (currentChatTag && currentChatTag.startsWith('group:')) {
     roleInstruction = `角色：你正在一个名为"${cn}"的群聊中。你需要扮演其中的成员进行回复。禁止扮演用户。`;
 }
 
+// 如果是群聊，生成一条系统提示，列出当前群聊成员并标注头像列表中是否存在
+if (isGroup) {
+    try {
+        const groupName = currentChatTag.replace(/^group:/, '');
+        let memberList = [];
+        const g = (appSettings.groups || []).find(x => x.name === groupName);
+        if (g && Array.isArray(g.members)) memberList = g.members.slice();
+        // 构造每个成员的标注：在头像列表中/不在头像列表中
+        const memberLines = memberList.map(m => {
+            const myName = window.userName || '{{user}}';
+            const isPresent = (appSettings.memberAvatars && (appSettings.memberAvatars[m] || appSettings.memberAvatars[myName] && m === myName));
+            return `- ${m} (${isPresent ? '头像列表中' : '未在头像列表'})`;
+        });
+
+        const p_members = `[群成员信息] 当前群聊："${groupName}" 的成员如下（来源：本地配置 appSettings.groups）：\n${memberLines.length ? memberLines.join('\n') : '- （无成员信息）'}\n\n重要：在角色扮演时，严禁新增不存在于此名单的成员；仅使用上面列出的名字进行回复。\n若名单中不包含 {{user}}，请理解当前用户不在此群（被视为非群成员）。`;
+        injects.push({ role: 'system', content: p_members, position: 'at_depth', depth: 1 });
+    } catch (e) { /* ignore */ }
+}
+
+// 已移除：修改群名对话框函数（功能已弃用）
+
+// 已移除：group rename 功能相关的工具与实现
+
 // 兼容旧版逗号分隔的群聊检测
 if (!isGroup && (cn.includes(',') || cn.includes('，'))) {
     roleInstruction = `角色：你正在群聊中，你需要扮演 ${cn} 中的一人或多人进行回复。禁止扮演用户。`;
@@ -3154,10 +3274,10 @@ generate(genParams);
 
 function showTypingIndicator() {
 const row = document.createElement('div'); row.id = 'typing-bubble'; row.className = 'message-row received';
-const av = document.createElement('img'); av.className = 'avatar'; av.src = appSettings.charAvatar;
-const el = document.createElement('div'); el.className = 'bubble bubble-received';
-el.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>'; el.style.backgroundColor = appSettings.charBubble;
-row.appendChild(av); row.appendChild(el); chatMessages.appendChild(row); chatMessages.scrollTop = chatMessages.scrollHeight;
+const el = document.createElement('div'); el.className = 'bubble bubble-received typing-only';
+el.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+el.style.backgroundColor = appSettings.charBubble;
+row.appendChild(el); chatMessages.appendChild(row); chatMessages.scrollTop = chatMessages.scrollHeight;
 // 点击气泡移除动画
 row.onclick = () => row.remove();
 }
@@ -3460,5 +3580,3 @@ function setScreenDisplay() {
 </script>
 </body>
 </html>
-
-
