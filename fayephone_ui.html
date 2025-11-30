@@ -99,21 +99,17 @@ overflow-x: hidden;
 box-sizing: border-box;
 }
 #home-screen {
-z-index: 1; padding-top: 0;
-align-items: center;
-/* 修复窄屏下页面左右晃动的问题 */
-overflow-x: hidden;
-width: 100%;
-justify-content: center;
-background-color: #f3e5f5;
-transform: translateX(0); opacity: 1;
+    z-index: 1; padding-top: 0;
+    align-items: center;
+    overflow-x: hidden;
+    width: 100%;
+    justify-content: center;
+    background-color: #f3e5f5;
+    /* 直接显示，无动画 */
+    opacity: 1;
 }
-#home-screen.slide-out {
-transform: translateX(-30%);
-opacity: 0.8;
-filter: brightness(0.8);
-pointer-events: none;
-}
+
+/* 移除.slide-out 动画 */
 
 /* 主屏幕时间 */
 #home-clock {
@@ -129,33 +125,31 @@ z-index: 5;
 
 /* 子页面 */
 #message-list-screen {
-z-index: 8;
-transform: translateX(100%);
-box-shadow: -5px 0 15px rgba(0,0,0,0.05);
-background-color: #fff;
-}
-#message-list-screen.visible {
-transform: translateX(0);
+    z-index: 8;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.05);
+    background-color: #fff;
 }
 
 /* Right side sliders */
 #chat-screen, #dark-search-screen {
-z-index: 10;
-transform: translateX(100%);
-box-shadow: -5px 0 15px rgba(0,0,0,0.05);
+    z-index: 10;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.05);
+    background-color: var(--interface-bg, #fff);
+}
+
+#chat-settings-screen {
+    z-index: 20; /* Ensure it covers the chat screen */
+    box-shadow: -5px 0 15px rgba(0,0,0,0.05);
+    background-color: var(--interface-bg, #fdf6f9);
 }
 
 /* Left side sliders */
 #settings-screen, #diary-screen {
-z-index: 10;
-transform: translateX(-100%);
-box-shadow: 5px 0 15px rgba(0,0,0,0.05);
+    z-index: 10;
+    box-shadow: 5px 0 15px rgba(0,0,0,0.05);
 }
 
-/* Visible state for all horizontal sliders */
-#chat-screen.visible, #dark-search-screen.visible, #settings-screen.visible, #diary-screen.visible {
-transform: translateX(0);
-}
+/* 移除 visible 状态动画 */
 
 /* Message List Styles */
 .message-list-body {
@@ -237,17 +231,27 @@ transition: background-color 0.3s;
 
 /* Header */
 .app-header {
-height: 80px; padding-top: 40px;
-display: flex; align-items: center;
-padding-left: 15px; padding-right: 15px;
-background-color: var(--interface-bg);
-backdrop-filter: blur(10px);
-border-bottom: 1px solid rgba(0,0,0,0.05);
-flex-shrink: 0; z-index: 10; box-sizing: border-box;
-transition: background-color 0.3s;
+    height: 80px; padding-top: 40px;
+    display: flex; align-items: center;
+    padding-left: 15px; padding-right: 15px;
+    /* 默认背景色 */
+    background-color: #fff;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    flex-shrink: 0; z-index: 10; box-sizing: border-box;
+    transition: background-color 0.3s;
+}
+
+/* 聊天相关页面的 header 用 interface-bg */
+#chat-screen .app-header {
+    background-color: var(--interface-bg);
+}
+#chat-settings-screen .app-header {
+    background-color: #fff;
 }
 .header-content { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; position: relative; }
 .header-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: flex-start; cursor: pointer; position: absolute; left: 0; }
+.header-btn-right { left: auto; right: 0; justify-content: flex-end; }
 .header-btn svg { width: 24px; height: 24px; fill: #181818; }
 .header-title { font-size: 17px; font-weight: 600; color: #181818; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; max-width: 70%; }
 
@@ -299,6 +303,48 @@ input:checked + .slider { background-color: #2196F3; }
 input:focus + .slider { box-shadow: 0 0 1px #2196F3; }
 input:checked + .slider:before { transform: translateX(20px); }
 
+/* Add Contact Styles */
+.contact-type-tabs { display: flex; border-bottom: 1px solid #eee; margin-bottom: 15px; padding-bottom: 5px; }
+.contact-type-tabs .tab { flex: 1; text-align: center; padding: 8px; cursor: pointer; color: #999; font-size: 14px; position: relative; transition: color 0.3s; }
+.contact-type-tabs .tab.active { color: #333; font-weight: bold; }
+.contact-type-tabs .tab.active::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 20px; height: 3px; background: #07c160; border-radius: 2px; }
+.group-input-item { margin-top: 8px; }
+
+/* Avatar Grid in Settings */
+.avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px 10px;
+    padding: 10px 0;
+}
+.avatar-grid-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+.avatar-sq {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px; /* Rounded Square */
+    object-fit: cover;
+    background: #eee;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+.avatar-sq:active { transform: scale(0.95); }
+.avatar-name {
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
 /* Message Styles */
 /* Love Effect */
 .love-effect-container {
@@ -323,7 +369,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 .avatar { width: 38px; height: 38px; border-radius: 6px; background-color: #e0e0e0; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.05); margin-top: 0; }
 
 /* 消息内容容器：包含名字、气泡、心声等 */
-.msg-container { display: flex; flex-direction: column; max-width: 50%; }
+.msg-container { display: flex; flex-direction: column; max-width: 70%; }
 .message-row.sent .msg-container { align-items: flex-end; }
 .message-row.received .msg-container { align-items: flex-start; }
 
@@ -452,12 +498,16 @@ max-width: 100%; height: 32px;
 
 /* Media Preview Bar */
 #media-preview-bar {
-display: none; padding: 8px 12px;
-background: var(--interface-bg);
-backdrop-filter: blur(10px);
-border-top: 1px solid rgba(0,0,0,0.05);
-flex-shrink: 0; z-index: 10;
-align-items: center;
+    display: none; padding: 8px 12px;
+    background: #fff;
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(0,0,0,0.05);
+    flex-shrink: 0; z-index: 10;
+    align-items: center;
+}
+#chat-screen #media-preview-bar,
+#chat-settings-screen #media-preview-bar {
+    background: var(--interface-bg);
 }
 #media-preview-bar.visible { display: flex; }
 .preview-item {
@@ -480,12 +530,19 @@ font-weight: bold;
 #input-bar {
     display: flex; padding: 2px 5px 10px 5px;
     border-top: none; /* No white line */
-    background-color: var(--interface-bg);
+    background-color: #fff;
     backdrop-filter: blur(10px);
     align-items: flex-end; flex-shrink: 0; z-index: 10;
     /* 减小输入框与上边缘间隙 */
     padding-bottom: 10px;
     transition: background-color 0.3s;
+}
+
+#chat-screen #input-bar {
+    background-color: var(--interface-bg);
+}
+#chat-settings-screen #input-bar {
+    background-color: #fff;
 }
 #input-bar textarea {
     margin-top: 5px;
@@ -608,7 +665,7 @@ display: grid; grid-template-columns: 1fr auto; align-items: center; font-size: 
 padding: 16px 18px; border-bottom: 1px solid #f7f7f7;
 }
 .settings-footer {
-padding: 20px; background: transparent; border-top: none;
+padding: 20px; background: #fff; border-top: 1px solid #eee;
 flex-shrink: 0; z-index: 10;
 }
 .btn-save {
@@ -739,6 +796,7 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 <div class="header-content">
 <div class="header-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg></div>
 <span class="header-title">消息</span>
+<div class="header-btn header-btn-right" onclick="openAddContactModal()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="#181818" stroke-width="2" stroke-linecap="round"></path></svg></div>
 </div>
 </div>
 <div class="message-list-body" id="message-list-body">
@@ -750,6 +808,7 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 <div class="header-content">
 <div class="header-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg></div>
 <span class="header-title" id="header-title">{{char}}</span>
+<div class="header-btn header-btn-right" onclick="openChatSettings()"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.6" fill="#181818"></circle><circle cx="12" cy="12" r="1.6" fill="#181818"></circle><circle cx="18" cy="12" r="1.6" fill="#181818"></circle></svg></div>
 </div>
 </div>
 <div id="chat-messages"></div>
@@ -782,7 +841,6 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 <div class="action-item" onclick="handleAction('location')"><div class="action-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div><span>位置</span></div>
 <div class="action-item" onclick="handleAction('transfer')"><div class="action-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5"><path d="M7 10h14l-4-4"></path><path d="M17 14H3l4 4"></path></svg></div><span>转账</span></div>
 <div class="action-item" onclick="handleAction('file')"><div class="action-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div><span>文件</span></div>
-<div class="action-item" onclick="openChatSettings()"><div class="action-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div><span>设置</span></div>
 </div>
 <div id="emoji-menu"></div>
 </div>
@@ -830,8 +888,8 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
         </div>
     </div>
 </div>
-<div class="settings-footer">
-<button class="modal-btn btn-save" style="width: 100%; padding: 14px; border-radius: 20px;" onclick="saveHomeSettings()">保存并应用</button>
+<div class="settings-footer" style="padding: 10px;">
+<button class="modal-btn btn-save" style="width: 100%; padding: 8px; border-radius: 12px; font-size: 13px;" onclick="saveHomeSettings()">保存并应用</button>
 </div>
 </div>
 <div id="dark-search-screen" class="screen" style="background-color: #000; color: #ff69b4;">
@@ -843,7 +901,7 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 </div>
 <div style="padding: 20px; display: flex; flex-direction: column; gap: 20px; align-items: center; height: 100%; box-sizing: border-box;">
 <div style="width: 100%; position: relative; flex-shrink: 0;">
-<input type="text" id="dark-search-input" placeholder="输入名字查看记录..." style="width: 100%; padding: 12px 40px 12px 15px; background: #111; border: 1px solid #333; color: #ff69b4; border-radius: 8px; box-sizing: border-box; outline: none;">
+<input type="text" id="dark-search-input" placeholder="输入名字查看搜索记录..." style="width: 100%; padding: 12px 40px 12px 15px; background: #111; border: 1px solid #333; color: #ff69b4; border-radius: 8px; box-sizing: border-box; outline: none;">
 <div onclick="searchDarkWeb()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff69b4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
 </div>
@@ -915,25 +973,48 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 <div class="modal-actions"><button class="modal-btn btn-cancel" onclick="closeModal()">取消</button><button class="modal-btn btn-grey" id="modal-confirm-btn">发送</button></div>
 </div>
 </div>
-<div id="chat-settings-modal" class="modal-overlay">
-<div class="modal-box" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; background: #fdf6f9;">
-<div class="modal-title" style="padding: 10px 20px; margin: 0; background: #fff; flex-shrink: 0; border-bottom: 1px solid #f0f0f0;">聊天设置</div>
-<div class="settings-body" style="padding: 8px 20px; flex: 1; overflow-y: auto; background: #fdf6f9; min-height: 0;">
+<div id="add-contact-modal" class="modal-overlay">
+<div class="modal-box">
+<div class="modal-title">发起聊天</div>
+<div class="contact-type-tabs">
+<div class="tab active" onclick="switchContactTab('private')">私聊</div>
+<div class="tab" onclick="switchContactTab('group')">群聊</div>
+</div>
+<div id="add-contact-private-section">
+<input type="text" id="new-contact-name" class="modal-input" placeholder="输入名字">
+</div>
+<div id="add-contact-group-section" style="display:none">
+<input type="text" id="group-name-input" class="modal-input" placeholder="群聊名称" style="margin-bottom:8px;">
+<input type="number" id="group-count" class="modal-input" placeholder="人数 (至少2人)" min="2" oninput="renderGroupInputs()">
+<div class="setting-row" style="padding: 10px 0; border: none; display: flex; justify-content: space-between; align-items: center;">
+    <label style="font-size: 14px; color: #666;">我加入群聊</label> 
+    <label class="switch">
+        <input type="checkbox" id="group-join-toggle">
+        <span class="slider round"></span>
+    </label>
+</div>
+<div id="group-names-container"></div>
+</div>
+<div class="modal-actions">
+<button class="modal-btn btn-cancel" onclick="closeAddContactModal()">取消</button>
+<button class="modal-btn btn-grey" onclick="confirmAddContact()">确认</button>
+</div>
+</div>
+</div>
+<div id="chat-settings-screen" class="screen">
+<div class="app-header">
+<div class="header-content">
+<div class="header-btn" onclick="closeChatSettings()"><svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path></svg></div>
+<span class="header-title">聊天设置</span>
+</div>
+</div>
+<div class="settings-body">
 
     <!-- 头像设置 -->
     <div>
         <div class="settings-section-title">头像设置</div>
-        <div class="setting-group" style="flex-direction: row; padding: 15px; justify-content: space-around; align-items: center;">
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                <img id="preview-char-avatar" class="preview-img" src="" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                <button class="file-upload-label" onclick="triggerSettingsUpload('char-avatar')" style="font-size: 11px; padding: 4px 8px;">更换头像</button>
-                <span style="font-size: 12px; color: #666;">对方</span>
-            </div>
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                <img id="preview-user-avatar" class="preview-img" src="" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                <button class="file-upload-label" onclick="triggerSettingsUpload('user-avatar')" style="font-size: 11px; padding: 4px 8px;">更换头像</button>
-                <span style="font-size: 12px; color: #666;">我方</span>
-            </div>
+        <div class="setting-group no-border" style="background: transparent; box-shadow: none;">
+             <div id="avatar-settings-container" class="avatar-grid"></div>
         </div>
     </div>
 
@@ -994,11 +1075,9 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
     </div>
 
 </div>
-<div class="modal-actions" style="padding: 20px; background: transparent; border-top: none; margin: 0; justify-content: space-between;">
-<button class="modal-btn btn-cancel" onclick="closeModal()" style="border-radius: 20px; padding: 12px 24px;">取消</button>
-<button class="modal-btn btn-save" onclick="saveChatSettings()" style="border-radius: 20px; padding: 12px 24px; flex: 1; margin-left: 10px;">保存配置</button>
-</div>
-</div>
+<div class="settings-footer" style="display: flex; gap: 8px; padding: 10px;">
+<button class="modal-btn btn-delete-chat" onclick="deleteCurrentChat()" style="flex: 1; border-radius: 12px; padding: 8px 0; background: #f2f2f2; color: #333; font-size: 13px;">删除聊天</button>
+<button class="modal-btn btn-save" onclick="saveChatSettings()" style="flex: 1; border-radius: 12px; padding: 8px 0; box-shadow: none; font-size: 13px;">保存配置</button>
 </div>
 </div>
 <script>
@@ -1022,8 +1101,14 @@ customTime: '', // 格式 HH:MM，为空则使用系统时间
 timeOffset: 0, // 时间偏移量 (ms)
 blockChar: false, // User blocks Char
 blockUser: false, // Char blocks User
+groups: [], // 群组列表 [{name: 'GroupName', members: ['A', 'B']}]
+privateChats: [], // 私聊列表 ['Name1', 'Name2']
+memberAvatars: {} // NEW: 成员头像列表 { 'Name': 'url', ... }
 };
 let appSettings = { ...defaultAppSettings };
+let currentChatTag = null; // 当前聊天标签 (e.g. chat:Name or group:Name5人)
+let currentChatTarget = null; // 当前聊天显示名称
+let initialCharName = null; // NEW: 用于固定存储 Key，防止进入聊天后标题变化导致设置重置
 
 let myStickerList = [];
 const defaultStickerList = [
@@ -1047,18 +1132,141 @@ let isWaitingForDiary = false;
 let currentSettingsUploadType = null;
 
 // DOM Elements (Initialized in init to be safe)
-let phoneContainer, homeScreen, chatScreen, settingsScreen, messageListScreen, messageListBody, chatMessages, messageInput, sendButton, plusButton, emojiButton, actionMenu, emojiMenu, modal, modalTitle, modalInputsContainer, modalConfirmBtn, chatSettingsModal, headerTitle, clockEl, homeClockEl, statusBar, photoInput, audioInput, videoInput, mediaPreviewBar, previewImage, previewFileIcon, adapterStatus, darkSearchScreen, darkSearchInput, diaryScreen;
+let phoneContainer, homeScreen, chatScreen, settingsScreen, messageListScreen, messageListBody, chatMessages, messageInput, sendButton, plusButton, emojiButton, actionMenu, emojiMenu, modal, modalTitle, modalInputsContainer, modalConfirmBtn, chatSettingsScreen, headerTitle, clockEl, homeClockEl, statusBar, photoInput, audioInput, videoInput, mediaPreviewBar, previewImage, previewFileIcon, adapterStatus, darkSearchScreen, darkSearchInput, diaryScreen, addContactModal;
 
 // Functions
+function openAddContactModal() {
+    if(addContactModal) {
+        addContactModal.classList.add('show');
+        // Reset tabs
+        switchContactTab('private');
+        document.getElementById('new-contact-name').value = '';
+        document.getElementById('group-count').value = '';
+        document.getElementById('group-name-input').value = '';
+        document.getElementById('group-names-container').innerHTML = '';
+        // Reset toggle
+        const toggle = document.getElementById('group-join-toggle');
+        if(toggle) toggle.checked = false;
+    }
+}
+
+function closeAddContactModal() {
+    if(addContactModal) addContactModal.classList.remove('show');
+}
+
+function switchContactTab(type) {
+    const tabs = document.querySelectorAll('.contact-type-tabs .tab');
+    const privateSection = document.getElementById('add-contact-private-section');
+    const groupSection = document.getElementById('add-contact-group-section');
+    
+    tabs.forEach(t => t.classList.remove('active'));
+    
+    if(type === 'private') {
+        tabs[0].classList.add('active');
+        privateSection.style.display = 'block';
+        groupSection.style.display = 'none';
+    } else {
+        tabs[1].classList.add('active');
+        privateSection.style.display = 'none';
+        groupSection.style.display = 'block';
+    }
+}
+
+function renderGroupInputs() {
+    const count = parseInt(document.getElementById('group-count').value) || 0;
+    const container = document.getElementById('group-names-container');
+    container.innerHTML = '';
+    
+    if(count > 0 && count <= 20) {
+        for(let i = 0; i < count; i++) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'modal-input group-input-item';
+            input.placeholder = `成员 ${i + 1} 名字`;
+            container.appendChild(input);
+        }
+    }
+}
+
+function confirmAddContact() {
+    const isGroup = document.getElementById('add-contact-group-section').style.display === 'block';
+    let targetName = '';
+    let targetTag = '';
+    
+    if(isGroup) {
+        // 群聊逻辑
+        const groupName = document.getElementById('group-name-input').value.trim();
+        if (!groupName) {
+            alert('请输入群聊名称');
+            return;
+        }
+
+        const joinToggle = document.getElementById('group-join-toggle');
+        const joinGroup = joinToggle ? joinToggle.checked : false;
+
+        const inputs = document.querySelectorAll('#group-names-container input');
+        const names = [];
+        
+        // 如果开启“我加入群聊”，将自己加入第一位
+        if (joinGroup) {
+            const myName = window.userName || '{{user}}';
+            names.push(myName);
+        }
+
+        inputs.forEach(inp => {
+            if(inp.value.trim()) names.push(inp.value.trim());
+        });
+
+        // 验证人数：如果不加入群聊，至少需要输入2个成员
+        // 如果加入群聊，算上自己至少2人，即输入至少1人
+        const minInputs = joinGroup ? 1 : 2;
+        if(names.length < 2) { // Total length check
+            alert(joinGroup ? '除自己外至少需要1个成员' : '群聊至少需要2个成员');
+            return;
+        }
+        
+        // 保存群组信息 (可选，主要用于备份成员列表，实际聊天记录靠标签隔离)
+        if (!appSettings.groups) appSettings.groups = [];
+        // 检查是否已存在同名群组
+        if (!appSettings.groups.find(g => g.name === groupName)) {
+            appSettings.groups.push({
+                name: groupName,
+                members: names
+            });
+            saveSettingsToStorage();
+        }
+        
+        targetName = groupName;
+        // 构造群聊标签: group:群名人数人
+        targetTag = `group:${groupName}${names.length}人`;
+        
+    } else {
+        // 私聊逻辑
+        targetName = document.getElementById('new-contact-name').value.trim();
+        if(!targetName) return;
+        targetTag = `chat:${targetName}`;
+
+        // NEW: 持久化保存私聊联系人
+        if (!appSettings.privateChats) appSettings.privateChats = [];
+        if (!appSettings.privateChats.includes(targetName)) {
+            appSettings.privateChats.push(targetName);
+            saveSettingsToStorage();
+        }
+    }
+    
+    closeAddContactModal();
+    openChat(targetTag, targetName);
+}
+
 function openDarkSearch() {
-if(homeScreen) homeScreen.classList.add('slide-out');
-if(darkSearchScreen) darkSearchScreen.classList.add('visible');
+if(homeScreen) homeScreen.style.display = 'none';
+if(darkSearchScreen) darkSearchScreen.style.display = 'flex';
 updateStatusBar('dark-search');
 }
 
 function closeDarkSearch() {
-if(darkSearchScreen) darkSearchScreen.classList.remove('visible');
-if(homeScreen) homeScreen.classList.remove('slide-out');
+if(darkSearchScreen) darkSearchScreen.style.display = 'none';
+if(homeScreen) homeScreen.style.display = 'flex';
 updateStatusBar('home');
 }
 
@@ -1139,15 +1347,14 @@ if (count === 0) {
 }
 
 function openDiary() {
-    if(homeScreen) homeScreen.classList.add('slide-out');
-    if(diaryScreen) diaryScreen.classList.add('visible');
+    if(homeScreen) homeScreen.style.display = 'none';
+    if(diaryScreen) diaryScreen.style.display = 'flex';
     updateStatusBar('diary');
 }
 
 function closeDiary() {
-    if(diaryScreen) diaryScreen.classList.remove('visible');
-    if(homeScreen) homeScreen.classList.remove('slide-out');
-    updateStatusBar('home');
+    if(diaryScreen) diaryScreen.style.display = 'none';
+    if(homeScreen) homeScreen.style.display = 'flex';
     updateStatusBar('home');
 }
 
@@ -1272,145 +1479,283 @@ function renderDiaryEntries(text) {
 }
 
 function openMessageList() {
-if(homeScreen) homeScreen.classList.add('slide-out');
-if(messageListScreen) messageListScreen.classList.add('visible');
+if(homeScreen) homeScreen.style.display = 'none';
+if(messageListScreen) messageListScreen.style.display = 'flex';
 updateStatusBar('message-list');
 renderMessageList();
 }
 
-function openChat() {
-// 从消息列表进入聊天
-if(chatScreen) chatScreen.classList.add('visible');
-updateStatusBar('chat');
-setTimeout(() => { if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight; }, 300);
+function openChat(targetTag, targetName) {
+    // 设置当前聊天对象
+    const mainCharName = window.charName || '{{char}}';
+    
+    // 默认情况（没有传参数）打开主角色聊天
+    if (!targetTag) {
+        currentChatTag = `chat:${mainCharName}`;
+        currentChatTarget = mainCharName;
+    } else {
+        currentChatTag = targetTag;
+        currentChatTarget = targetName;
+    }
+
+    // 更新标题
+    const headerTitleEl = document.getElementById('header-title');
+    if(headerTitleEl) headerTitleEl.textContent = currentChatTarget;
+
+    // 刷新聊天内容
+    if (typeof loadInitialChat === 'function') loadInitialChat();
+
+    // 从消息列表进入聊天
+    if(messageListScreen) messageListScreen.style.display = 'none';
+    if(chatScreen) chatScreen.style.display = 'flex';
+    updateStatusBar('chat');
+    setTimeout(() => { if(chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight; }, 300);
 }
 
 function goBack() {
 closeMenus();
-if(chatScreen && chatScreen.classList.contains('visible')) {
+
+if (chatSettingsScreen && chatSettingsScreen.style.display === 'flex') {
+    closeChatSettings();
+    return;
+}
+
+if(chatScreen && chatScreen.style.display === 'flex') {
     // 从聊天返回消息列表
-    chatScreen.classList.remove('visible');
+    chatScreen.style.display = 'none';
+    if(messageListScreen) messageListScreen.style.display = 'flex';
     updateStatusBar('message-list');
     renderMessageList(); // 刷新预览
     return;
 }
 
-if(messageListScreen && messageListScreen.classList.contains('visible')) {
+if(messageListScreen && messageListScreen.style.display === 'flex') {
     // 从消息列表返回主屏幕
-    messageListScreen.classList.remove('visible');
-    if(homeScreen) homeScreen.classList.remove('slide-out');
+    messageListScreen.style.display = 'none';
+    if(homeScreen) homeScreen.style.display = 'flex';
     updateStatusBar('home');
     return;
 }
 
-if(settingsScreen && settingsScreen.classList.contains('visible')) {
-    settingsScreen.classList.remove('visible');
-    if(homeScreen) homeScreen.classList.remove('slide-out');
+if(settingsScreen && settingsScreen.style.display === 'flex') {
+    settingsScreen.style.display = 'none';
+    if(homeScreen) homeScreen.style.display = 'flex';
     updateStatusBar('home');
     return;
 }
 
 // Fallback
-if(homeScreen) homeScreen.classList.remove('slide-out');
+if(homeScreen) homeScreen.style.display = 'flex';
 updateStatusBar('home');
+}
+
+// 辅助函数：从历史记录字符串中提取所有聊天块
+function getAllChatsFromHistory(rawText) {
+    const chats = new Map();
+    // 匹配 <chat:Name>...</chat:Name> 或 <group:NameCount>...</group:NameCount>
+    // 以及兼容旧版或无参数的结束标签 </chat>, </group>
+    // 正则策略：<(type):(name)> (content) <\/type> 
+    // 注意：结束标签可能是简化的 </chat> 而不是 </chat:name>。
+    // 我们假设结构总是 <tag:id>...</tag>
+    
+    const regex = /<(chat|group):(.*?)>([\s\S]*?)<\/\1>/gi;
+    let match;
+    while ((match = regex.exec(rawText)) !== null) {
+        const type = match[1];
+        const name = match[2];
+        const content = match[3];
+        const key = `${type}:${name}`;
+        chats.set(key, content.trim());
+    }
+    
+    // 兼容：如果没有匹配到任何带 ID 的标签，但有内容，可能属于默认角色
+    if (chats.size === 0 && rawText.trim().length > 0) {
+         // 检查是否有裸露的内容或旧版格式
+         // 这里暂定：如果完全匹配不到，就不处理，或者视为默认角色
+    }
+    
+    return chats;
 }
 
 function renderMessageList() {
 if(!messageListBody) return;
 messageListBody.innerHTML = '';
 
-const charName = window.charName || '{{char}}';
-const avatar = appSettings.charAvatar;
+const mainCharName = window.charName || '{{char}}';
+const defaultAvatar = appSettings.charAvatar;
 
-// 获取最后一条消息
-let lastMsg = '点击开始聊天';
-let lastTime = '';
-
+// 1. 获取所有聊天记录并解析
+let chatsMap = new Map();
 try {
     if (typeof getCurrentMessageId !== 'undefined') {
          const h = getChatMessages(getCurrentMessageId());
          if (h && h[0] && h[0].message) {
              const m = h[0].message.match(/<fphone>([\s\S]*?)<\/fphone>/i);
              if (m) {
-                 const c = m[1].replace(/<\/?chat(:.*?)?>/gi, '').trim();
-                 const msgs = parseMessages(c);
-                 // 过滤掉暗网搜索记录和日记
-                 const validMsgs = msgs.filter(m => {
-                     if (m.header && (m.header.includes('【搜索记录') || m.header.includes('【日记') || m.type === 'search-history')) return false;
-                     if (m.body && (m.body.startsWith('【日记') || m.body.startsWith('【搜索记录'))) return false;
-                     return true;
-                 });
-                 
-                 if (validMsgs.length > 0) {
-                     const last = validMsgs[validMsgs.length - 1];
-                     if (last.type === 'text') lastMsg = last.body;
-                     else if (last.type === 'photo') lastMsg = '[图片]';
-                     else if (last.type === 'sticker') lastMsg = '[表情包]';
-                     else if (last.type === 'voice') lastMsg = '[语音]';
-                     else if (last.type === 'file') lastMsg = '[文件]';
-                     else if (last.type === 'location') lastMsg = '[位置]';
-                     else if (last.type === 'transfer') lastMsg = '[转账]';
-                     else if (last.type === 'transfer') lastMsg = '[转账]';
-                     else lastMsg = '[消息]';
-                     
-                     // 尝试从 header 获取时间
-                     if (last.header) {
-                         const parts = last.header.replace(/^\[|\]$|^【|】$/g, '').split('|');
-                         if (parts.length > 1) lastTime = parts[parts.length - 1];
-                     }
-                 }
+                 // 提取 fphone 内部所有内容
+                 const rawContent = m[1];
+                 chatsMap = getAllChatsFromHistory(rawContent);
              }
          }
     }
 } catch(e) {}
 
-try {
-    if (typeof getCurrentMessageId !== 'undefined') {
-         const h = getChatMessages(getCurrentMessageId());
-         if (h && h[0] && h[0].message) {
-             const m = h[0].message.match(/<fphone>([\s\S]*?)<\/fphone>/i);
-             if (m) {
-                 const c = m[1].replace(/<\/?chat(:.*?)?>/gi, '').trim();
-                 const msgs = parseMessages(c);
-                 if (msgs.length > 0) {
-                     const last = msgs[msgs.length - 1];
-                     if (last.type === 'text') lastMsg = last.body;
-                     else if (last.type === 'photo') lastMsg = '[图片]';
-                     else if (last.type === 'sticker') lastMsg = '[表情包]';
-                     else if (last.type === 'voice') lastMsg = '[语音]';
-                     else if (last.type === 'file') lastMsg = '[文件]';
-                     else if (last.type === 'location') lastMsg = '[位置]';
-                     else if (last.type === 'transfer') lastMsg = '[转账]';
-                     else lastMsg = '[消息]';
-                     
-                     // 尝试从 header 获取时间
-                     if (last.header) {
-                         const parts = last.header.replace(/^\[|\]$|^【|】$/g, '').split('|');
-                         if (parts.length > 1) lastTime = parts[parts.length - 1];
-                     }
-                 }
-             }
-         }
+// 2. 准备会话列表数据
+const conversations = {};
+
+// 2.1 从 appSettings 加载预设群组 (确保即时没有消息也显示)
+if (appSettings.groups && Array.isArray(appSettings.groups)) {
+    appSettings.groups.forEach(group => {
+        const key = `group:${group.name}${group.members.length}人`;
+        // 优先显示自定义群聊头像
+        let groupAvatar = (appSettings.groupAvatars && appSettings.groupAvatars[key])
+            ? appSettings.groupAvatars[key]
+            : defaultAvatar;
+        conversations[key] = {
+            tag: key,
+            name: group.name,
+            avatar: groupAvatar,
+            lastMsg: '点击进入群聊',
+            lastTime: '',
+            timestamp: 0,
+            isGroup: true,
+            memberCount: group.members.length
+        };
+    });
+}
+
+// 2.2 从 appSettings 加载预设私聊
+if (appSettings.privateChats && Array.isArray(appSettings.privateChats)) {
+    appSettings.privateChats.forEach(name => {
+        const key = `chat:${name}`;
+        if (!conversations[key]) {
+             conversations[key] = {
+                tag: key,
+                name: name,
+                avatar: defaultAvatar, 
+                lastMsg: '点击开始聊天',
+                lastTime: '',
+                timestamp: 0,
+                isGroup: false
+             };
+        }
+    });
+}
+
+// 2.3 确保默认角色存在
+const defaultCharKey = `chat:${mainCharName}`;
+if (!conversations[defaultCharKey]) {
+    conversations[defaultCharKey] = {
+        tag: defaultCharKey,
+        name: mainCharName,
+        avatar: defaultAvatar,
+        lastMsg: '点击开始聊天',
+        lastTime: getTime(),
+        timestamp: 0,
+        isGroup: false
+    };
+}
+
+// 2.4 遍历历史记录中的所有会话，合并/更新信息
+chatsMap.forEach((content, key) => {
+    // key 格式: "chat:Name" 或 "group:NameCount"
+    const [type, ...nameParts] = key.split(':');
+    const nameId = nameParts.join(':'); // 防止名字里有冒号
+    
+    let displayName = nameId;
+    let isGroup = type === 'group';
+    
+    // 如果是群组，尝试解析名字 (去掉末尾的人数)
+    if (isGroup) {
+         // 简单的展示逻辑，名字就是 ID
+         // 也可以尝试去掉 "x人" 后缀
     }
-} catch(e) {}
+    
+    if (!conversations[key]) {
+        // 优先显示自定义群聊头像
+        let groupAvatar = (isGroup && appSettings.groupAvatars && appSettings.groupAvatars[key])
+            ? appSettings.groupAvatars[key]
+            : defaultAvatar;
+        conversations[key] = {
+            tag: key,
+            name: displayName,
+            avatar: isGroup ? groupAvatar : defaultAvatar,
+            lastMsg: '',
+            lastTime: '',
+            timestamp: 0,
+            isGroup: isGroup
+        };
+    }
+    
+    // 解析最后一条消息
+    const msgs = parseMessages(content);
+    // 过滤掉隐藏消息
+    const validMsgs = msgs.filter(m => {
+        if (m.header && (m.header.includes('【搜索记录') || m.header.includes('【日记') || m.type === 'search-history')) return false;
+        if (m.body && (m.body.startsWith('【日记') || m.body.startsWith('【搜索记录'))) return false;
+        return true;
+    });
 
-if (!lastTime) lastTime = getTime();
+    if (validMsgs.length > 0) {
+        const last = validMsgs[validMsgs.length - 1];
+        let displayMsg = '[消息]';
+        if (last.type === 'text') displayMsg = last.body;
+        else if (last.type === 'photo') displayMsg = '[图片]';
+        else if (last.type === 'sticker') displayMsg = '[表情包]';
+        else if (last.type === 'voice') displayMsg = '[语音]';
+        else if (last.type === 'file') displayMsg = '[文件]';
+        else if (last.type === 'location') displayMsg = '[位置]';
+        else if (last.type === 'transfer') displayMsg = '[转账]';
+        
+        conversations[key].lastMsg = displayMsg;
+        
+        if (last.header) {
+            const parts = last.header.replace(/^\[|\]$|^【|】$/g, '').split('|');
+            if (parts.length > 1) conversations[key].lastTime = parts[parts.length - 1];
+        }
+        conversations[key].timestamp = Date.now(); // 简单处理，实际应该解析时间
+    }
+});
 
-const item = document.createElement('div');
-item.className = 'message-list-item';
-item.onclick = openChat;
 
-item.innerHTML = `
-    <img class="message-list-avatar" src="${avatar}">
-    <div class="message-list-info">
-        <div class="message-list-top">
-            <span class="message-list-name">${charName}</span>
-            <span class="message-list-time">${lastTime}</span>
+// 3. 渲染列表
+Object.values(conversations).forEach(chat => {
+    const item = document.createElement('div');
+    item.className = 'message-list-item';
+    item.onclick = () => openChat(chat.tag, chat.name);
+
+    // 处理群名显示
+    let displayName = chat.name;
+    // 如果是群组标签，尝试美化显示
+    if (chat.isGroup) {
+        // ID 可能是 "炽光车队5人"，显示时可以优化，但这里直接显示也没问题
+    }
+    
+    // NEW: 获取特定头像 (如果已设置)
+    let displayAvatar;
+    if (chat.isGroup) {
+        // 群聊头像直接用 chat.avatar（已在 conversations 构建时处理自定义头像）
+        displayAvatar = chat.avatar;
+    } else {
+        // 私聊：优先显示 memberAvatars 里的头像
+        if (appSettings.memberAvatars && appSettings.memberAvatars[displayName]) {
+            displayAvatar = appSettings.memberAvatars[displayName];
+        } else {
+            displayAvatar = chat.avatar;
+        }
+    }
+    item.innerHTML = `
+        <img class="message-list-avatar" src="${displayAvatar}">
+        <div class="message-list-info">
+            <div class="message-list-top">
+                <span class="message-list-name">${displayName} ${chat.isGroup ? '<span style="font-size:10px;color:#999;background:#f0f0f0;padding:1px 4px;border-radius:4px;">群</span>' : ''}</span>
+                <span class="message-list-time">${chat.lastTime || getTime()}</span>
+            </div>
+            <div class="message-list-preview">${chat.lastMsg}</div>
         </div>
-        <div class="message-list-preview">${lastMsg}</div>
-    </div>
-`;
-messageListBody.appendChild(item);
+    `;
+    messageListBody.appendChild(item);
+});
 }
 
 function openSettings() {
@@ -1446,14 +1791,14 @@ if (statusEl) {
     }
 }
 
-if(homeScreen) homeScreen.classList.add('slide-out');
-if(settingsScreen) settingsScreen.classList.add('visible');
+if(homeScreen) homeScreen.style.display = 'none';
+if(settingsScreen) settingsScreen.style.display = 'flex';
 updateStatusBar('settings');
 }
 
 function closeSettings() {
-if(settingsScreen) settingsScreen.classList.remove('visible');
-if(homeScreen) homeScreen.classList.remove('slide-out');
+if(settingsScreen) settingsScreen.style.display = 'none';
+if(homeScreen) homeScreen.style.display = 'flex';
 updateStatusBar('home');
 }
 
@@ -1535,25 +1880,50 @@ function loadSettings() {
     const key = getStorageKey();
     const charName = window.charName; // getStorageKey 会更新这个值
 
-    // 1. Reset to defaults
-    appSettings = { ...defaultAppSettings };
-    
-    // 2. Load Settings
-    const saved = localStorage.getItem(key);
-    if (saved) {
-        try { 
-            const parsed = JSON.parse(saved);
-            appSettings = { ...appSettings, ...parsed }; 
-            // 确保拉黑状态被正确加载
-            if (typeof parsed.blockChar !== 'undefined') appSettings.blockChar = parsed.blockChar;
-            if (typeof parsed.blockUser !== 'undefined') appSettings.blockUser = parsed.blockUser;
-            // 确保自定义时间被正确加载
-            if (typeof parsed.customTime !== 'undefined') appSettings.customTime = parsed.customTime;
-            if (typeof parsed.timeOffset !== 'undefined') appSettings.timeOffset = parsed.timeOffset;
+    // 1. 先加载全局设置
+    let globalSettings = { ...defaultAppSettings };
+    const globalSaved = localStorage.getItem('st-phone-settings-global');
+    if (globalSaved) {
+        try {
+            const parsed = JSON.parse(globalSaved);
+            globalSettings = { ...globalSettings, ...parsed };
         } catch(e) {}
     }
 
-    // 3. Validate Paths: Ensure we don't use assets from other characters
+    // 2. 再加载当前key设置（如角色/群聊）
+    let currentSettings = {};
+    if (key !== 'st-phone-settings-global') {
+        const saved = localStorage.getItem(key);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                currentSettings = parsed;
+            } catch(e) {}
+        }
+    }
+
+    // 3. 合并，主屏相关字段只用全局，聊天相关字段用当前key覆盖
+    appSettings = { ...globalSettings, ...currentSettings };
+    // 强制主屏相关字段只用全局
+    appSettings.phoneWidth = globalSettings.phoneWidth;
+    appSettings.phoneHeight = globalSettings.phoneHeight;
+    appSettings.caseColor = globalSettings.caseColor;
+    appSettings.iconBg = globalSettings.iconBg;
+    appSettings.iconColor = globalSettings.iconColor;
+    appSettings.homeTextColor = globalSettings.homeTextColor;
+    appSettings.homeBg = globalSettings.homeBg;
+    appSettings.homeBgIsDark = globalSettings.homeBgIsDark;
+    appSettings.customTime = globalSettings.customTime;
+    appSettings.timeOffset = globalSettings.timeOffset;
+
+    // 4. 其它兼容性处理
+    if (typeof appSettings.blockChar === 'undefined' && typeof currentSettings.blockChar !== 'undefined') appSettings.blockChar = currentSettings.blockChar;
+    if (typeof appSettings.blockUser === 'undefined' && typeof currentSettings.blockUser !== 'undefined') appSettings.blockUser = currentSettings.blockUser;
+    if (typeof appSettings.groups === 'undefined' && typeof currentSettings.groups !== 'undefined') appSettings.groups = currentSettings.groups;
+    if (typeof appSettings.privateChats === 'undefined' && typeof currentSettings.privateChats !== 'undefined') appSettings.privateChats = currentSettings.privateChats;
+    if (typeof appSettings.memberAvatars === 'undefined' && typeof currentSettings.memberAvatars !== 'undefined') appSettings.memberAvatars = currentSettings.memberAvatars;
+
+    // 5. Validate Paths: Ensure we don't use assets from other characters
     if (charName) {
         const validatePath = (path, defaultVal) => {
             if (!path || typeof path !== 'string' || !path.includes('/user/images/')) return path;
@@ -1596,7 +1966,10 @@ function getCurrentCharacterName() {
     // 3. Fallback to window.charName
     if (window.charName && window.charName !== '{{char}}') return window.charName;
     
-    // 4. Fallback to DOM title
+    // 4. Fallback to cached initial name
+    if (initialCharName && initialCharName !== '{{char}}') return initialCharName;
+    
+    // 5. Fallback to DOM title (last resort)
     const titleEl = document.getElementById('header-title');
     if (titleEl && titleEl.textContent && titleEl.textContent !== '{{char}}') return titleEl.textContent;
     
@@ -1654,36 +2027,40 @@ return `rgba(${r},${g},${b},${alpha})`;
 
 function applySettings() {
 if(phoneContainer) {
-phoneContainer.style.width = (appSettings.phoneWidth || 350) + 'px';
-phoneContainer.style.height = (appSettings.phoneHeight || 650) + 'px';
-phoneContainer.style.borderColor = appSettings.caseColor;
-phoneContainer.style.backgroundColor = appSettings.caseColor; // 修复圆角缝隙：背景色跟随手机壳颜色
+    phoneContainer.style.width = (appSettings.phoneWidth || 350) + 'px';
+    phoneContainer.style.height = (appSettings.phoneHeight || 650) + 'px';
+    phoneContainer.style.borderColor = appSettings.caseColor;
+    phoneContainer.style.backgroundColor = appSettings.caseColor; // 修复圆角缝隙：背景色跟随手机壳颜色
 }
 if(homeScreen) {
-if (appSettings.homeBg) homeScreen.style.backgroundImage = `url(${appSettings.homeBg})`;
-else { homeScreen.style.backgroundImage = 'none'; homeScreen.style.backgroundColor = '#f3e5f5'; }
+    if (appSettings.homeBg) homeScreen.style.backgroundImage = `url(${appSettings.homeBg})`;
+    else { homeScreen.style.backgroundImage = 'none'; homeScreen.style.backgroundColor = '#f3e5f5'; }
 }
 if(chatScreen) {
-if (appSettings.chatBg) { chatScreen.style.backgroundImage = `url(${appSettings.chatBg})`; chatScreen.style.backgroundColor = '#f9f9f9'; }
-else { chatScreen.style.backgroundImage = 'none'; chatScreen.style.backgroundColor = '#fff'; }
+    if (appSettings.chatBg) { chatScreen.style.backgroundImage = `url(${appSettings.chatBg})`; chatScreen.style.backgroundColor = '#f9f9f9'; }
+    else { chatScreen.style.backgroundImage = 'none'; chatScreen.style.backgroundColor = '#fff'; }
 }
 
 document.querySelectorAll('.app-icon-style').forEach(el => {
-el.style.background = appSettings.iconBg;
-const svg = el.querySelector('svg');
-if (svg) svg.style.fill = appSettings.iconColor;
-const mask = el.querySelector('.app-icon-image');
-if (mask) mask.style.backgroundColor = appSettings.iconColor;
+    el.style.background = appSettings.iconBg;
+    const svg = el.querySelector('svg');
+    if (svg) svg.style.fill = appSettings.iconColor;
+    const mask = el.querySelector('.app-icon-image');
+    if (mask) mask.style.backgroundColor = appSettings.iconColor;
 });
 
 if (appSettings.homeTextColor) {
-if(homeClockEl) homeClockEl.style.color = appSettings.homeTextColor;
-document.querySelectorAll('.app-name').forEach(el => el.style.color = appSettings.homeTextColor);
+    if(homeClockEl) homeClockEl.style.color = appSettings.homeTextColor;
+    document.querySelectorAll('.app-name').forEach(el => el.style.color = appSettings.homeTextColor);
 }
 
-const rootStyle = document.documentElement.style;
+// 只在聊天相关页面设置 --interface-bg
 const rgba = hexToRgba(appSettings.interfaceColor || '#f7f7f7', 0.6);
-rootStyle.setProperty('--interface-bg', rgba);
+if (chatScreen) chatScreen.style.setProperty('--interface-bg', rgba);
+if (document.getElementById('chat-settings-screen')) document.getElementById('chat-settings-screen').style.setProperty('--interface-bg', rgba);
+// 主屏和消息列表不设置 --interface-bg，保持原有色彩
+
+const rootStyle = document.documentElement.style;
 rootStyle.setProperty('--msg-name-color', appSettings.msgNameColor || '#999999');
 rootStyle.setProperty('--msg-time-color', appSettings.msgTimeColor || '#b0b0b0');
 rootStyle.setProperty('--msg-font-size', (appSettings.fontSize || 14) + 'px');
@@ -1736,13 +2113,92 @@ appSettings.homeBgIsDark = await analyzeImageBrightness(appSettings.homeBg);
 saveSettingsToStorage(); applySettings(); closeSettings();
 }
 
+function renderAvatarSettings() {
+    const container = document.getElementById('avatar-settings-container');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    const isGroup = currentChatTag && currentChatTag.startsWith('group:');
+    let members = [];
+    const myName = window.userName || '{{user}}';
+
+    // 群聊头像（默认头像）
+    if (isGroup) {
+        // 顶部插入群聊头像
+        const groupAvatarDiv = document.createElement('div');
+        groupAvatarDiv.className = 'avatar-grid-item';
+        const groupImg = document.createElement('img');
+        groupImg.className = 'avatar-sq';
+        // 支持自定义群聊头像
+        let groupAvatar = appSettings.groupAvatars && appSettings.groupAvatars[currentChatTag]
+            ? appSettings.groupAvatars[currentChatTag]
+            : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2IwYjBiMCI+PHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZjJmMmYyIi8+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OS00IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==';
+        groupImg.src = groupAvatar;
+        groupImg.style.border = '2px solid #ffb6b6';
+        groupImg.style.background = '#fff';
+        groupImg.title = '群聊头像';
+        groupImg.onclick = () => triggerSettingsUpload('group-avatar');
+        const groupLabel = document.createElement('span');
+        groupLabel.className = 'avatar-name';
+        groupLabel.textContent = '群聊头像';
+        groupAvatarDiv.appendChild(groupImg);
+        groupAvatarDiv.appendChild(groupLabel);
+        container.appendChild(groupAvatarDiv);
+    }
+
+    if (isGroup) {
+        // Group Logic
+        const tag = currentChatTag;
+        const groupInfo = appSettings.groups ? appSettings.groups.find(g => `group:${g.name}${g.members.length}人` === tag) : null;
+        if (groupInfo) {
+            groupInfo.members.forEach(m => {
+                const isMe = (m === myName || m === '{{user}}' || m === 'User' || m === '我');
+                // 优先显示自定义头像
+                let av = (appSettings.memberAvatars && appSettings.memberAvatars[m])
+                    ? appSettings.memberAvatars[m]
+                    : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2IwYjBiMCI+PHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZjJmMmYyIi8+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OS00IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==';
+                let uploadKey = `member:${m}`;
+                if (isMe) uploadKey = 'user-avatar';
+                members.push({ name: m, isMe: isMe, avatar: av, uploadKey: uploadKey });
+            });
+        } else {
+            members.push({ name: '群成员', isMe: false, avatar: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2IwYjBiMCI+PHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZjJmMmYyIi8+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OS00IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==', uploadKey: 'char-avatar' });
+        }
+    } else {
+        // 私聊：我和对方
+        members.push({ name: myName, isMe: true, avatar: appSettings.userAvatar, uploadKey: 'user-avatar' });
+        const targetName = currentChatTarget || (window.charName || '{{char}}');
+        const av = (appSettings.memberAvatars && appSettings.memberAvatars[targetName]) ? appSettings.memberAvatars[targetName] : appSettings.charAvatar;
+        members.push({ name: targetName, isMe: false, avatar: av, uploadKey: `member:${targetName}` });
+    }
+
+    // Render Grid
+    members.forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'avatar-grid-item';
+        const img = document.createElement('img');
+        img.className = 'avatar-sq';
+        img.src = m.avatar;
+        img.onclick = () => triggerSettingsUpload(m.uploadKey);
+        const safeId = 'preview-av-' + m.uploadKey.replace(/[^a-zA-Z0-9]/g, '');
+        img.id = safeId;
+        const label = document.createElement('span');
+        label.className = 'avatar-name';
+        label.textContent = m.isMe ? '我' : m.name;
+        item.appendChild(img);
+        item.appendChild(label);
+        container.appendChild(item);
+    });
+}
+
 function openChatSettings() {
 document.getElementById('set-char-bubble').value = appSettings.charBubble;
 document.getElementById('set-char-text').value = appSettings.charText;
 document.getElementById('set-user-bubble').value = appSettings.userBubble;
 document.getElementById('set-user-text').value = appSettings.userText;
-document.getElementById('preview-char-avatar').src = appSettings.charAvatar;
-document.getElementById('preview-user-avatar').src = appSettings.userAvatar;
+// Avatars are now handled by renderAvatarSettings
+// document.getElementById('preview-char-avatar').src = appSettings.charAvatar;
+// document.getElementById('preview-user-avatar').src = appSettings.userAvatar;
 document.getElementById('preview-chat-bg').src = appSettings.chatBg || '';
 document.getElementById('set-interface-color').value = appSettings.interfaceColor || '#f7f7f7';
 document.getElementById('set-msg-name-color').value = appSettings.msgNameColor || '#999999';
@@ -1751,7 +2207,18 @@ document.getElementById('set-font-size').value = appSettings.fontSize || 14;
 document.getElementById('set-chat-btn-text').value = appSettings.chatBtnText || '#2ea0a0';
 document.getElementById('set-block-char').checked = appSettings.blockChar || false;
 document.getElementById('set-block-user').checked = appSettings.blockUser || false;
-chatSettingsModal.classList.add('show');
+
+// Render the dynamic avatar grid
+renderAvatarSettings();
+
+// 切换到设置页面
+if(chatSettingsScreen) chatSettingsScreen.style.display = 'flex';
+updateStatusBar('settings');
+}
+
+function closeChatSettings() {
+    if(chatSettingsScreen) chatSettingsScreen.style.display = 'none';
+    updateStatusBar('chat');
 }
 
 async function saveChatSettings() {
@@ -1767,16 +2234,65 @@ appSettings.chatBtnText = document.getElementById('set-chat-btn-text').value;
 appSettings.blockChar = document.getElementById('set-block-char').checked;
 appSettings.blockUser = document.getElementById('set-block-user').checked;
 
-const charAvatarUrl = document.getElementById('preview-char-avatar').src;
-if (charAvatarUrl) appSettings.charAvatar = charAvatarUrl;
-const userAvatarUrl = document.getElementById('preview-user-avatar').src;
-if (userAvatarUrl) appSettings.userAvatar = userAvatarUrl;
+// Avatars are updated immediately via upload callback, no need to save from specific elements here
+// But we need to ensure appSettings is persisted
 const chatBgUrl = document.getElementById('preview-chat-bg').src;
 if (chatBgUrl && chatBgUrl !== window.location.href) {
 appSettings.chatBg = chatBgUrl;
 appSettings.chatBgIsDark = await analyzeImageBrightness(appSettings.chatBg);
 }
-saveSettingsToStorage(); applySettings(); closeModal(); closeMenus();
+saveSettingsToStorage(); applySettings(); closeChatSettings(); closeMenus();
+}
+
+async function deleteCurrentChat() {
+    if (!currentChatTag) return;
+    if (!confirm('确定要删除与 ' + currentChatTarget + ' 的聊天吗？\n删除后无法恢复聊天记录。')) return;
+
+    // 1. 从 appSettings 中移除列表项
+    if (currentChatTag.startsWith('chat:')) {
+        // 私聊: tag is "chat:Name"
+        const name = currentChatTag.replace('chat:', '');
+        if (appSettings.privateChats) {
+            appSettings.privateChats = appSettings.privateChats.filter(n => n !== name);
+        }
+    } else if (currentChatTag.startsWith('group:')) {
+        // 群聊: tag is "group:NameCount人"
+        if (appSettings.groups) {
+             appSettings.groups = appSettings.groups.filter(g => `group:${g.name}${g.members.length}人` !== currentChatTag);
+        }
+    }
+    saveSettingsToStorage();
+
+    // 2. 从 XML 历史记录中物理删除内容
+    try {
+        if (typeof getCurrentMessageId !== 'undefined') {
+            const history = getChatMessages(getCurrentMessageId());
+            if (history && history[0]) {
+                const m = history[0].message.match(/<fphone>([\s\S]*?)<\/fphone>/i);
+                if (m) {
+                    let rawContent = m[1];
+                    const [type, ...nameParts] = currentChatTag.split(':');
+                    const nameId = nameParts.join(':');
+
+                    // Regex to match <type:name>content</type>
+                    const safeNameId = nameId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`<${type}:${safeNameId}>[\\s\\S]*?<\\/${type}>`, 'gi');
+
+                    let newContent = rawContent.replace(regex, '').trim();
+
+                    // Update SillyTavern history
+                    const finalMsg = `<fphone>\n${newContent}\n</fphone>`;
+                    await setChatMessages([{ message_id: getCurrentMessageId(), message: finalMsg }], { refresh: 'none' });
+                }
+            }
+        }
+    } catch (e) {
+        console.error("Failed to delete chat history", e);
+    }
+
+    // 3. UI 跳转
+    closeChatSettings();
+    goBack(); // 回到消息列表
 }
 
 function closeModal() {
@@ -1786,13 +2302,10 @@ modal.classList.remove('show');
 currentConfirmAction = null; // Cleanup current action
 return;
 }
-// If input modal is not visible, close the settings modal
-if(chatSettingsModal && chatSettingsModal.classList.contains('show')) {
-chatSettingsModal.classList.remove('show');
-}
+// Chat settings modal logic removed since it's now a screen
 currentConfirmAction = null;
 }
-function toBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result); reader.onerror = error => reject(error); }); }
+function toBase64(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result); reader.onerror = () => reject(new Error('Failed to read file')); }); }
 
 function closeMenus() {
 if(actionMenu) actionMenu.classList.remove('open');
@@ -1958,70 +2471,57 @@ const text = messageInput.value.trim();
 let fileSent = false;
 
 // 1. 处理文件上传 (如果有)
-if (pendingFile) {
-    fileSent = true;
-    // 检查是否有适配器插件
-    if (window.parent && window.parent.__fayePhoneSupport_upload) {
-        try {
-            // 获取角色名
-            let cName = 'default';
-            
-            // 尝试从父窗口获取准确的角色名
-            if (window.parent && window.parent.SillyTavern) {
-                try {
-                    const ctx = window.parent.SillyTavern.getContext();
-                    if (ctx) {
-                        let chars = ctx.characters;
-                        // Handle Promise
-                        if (chars && typeof chars.then === 'function') {
-                             chars = await chars;
+    if (pendingFile) {
+        fileSent = true;
+        // 检查是否有适配器插件
+        if (window.parent && window.parent.__fayePhoneSupport_upload) {
+            try {
+                // 获取角色名
+                let cName = 'default';
+                // 尝试从父窗口获取准确的角色名
+                if (window.parent && window.parent.SillyTavern) {
+                    try {
+                        const ctx = window.parent.SillyTavern.getContext();
+                        if (ctx) {
+                            let chars = ctx.characters;
+                            if (chars && typeof chars.then === 'function') {
+                                chars = await chars;
+                            }
+                            if (chars && ctx.characterId && chars[ctx.characterId]) {
+                                cName = chars[ctx.characterId].name;
+                            }
                         }
-                        if (chars && ctx.characterId && chars[ctx.characterId]) {
-                            cName = chars[ctx.characterId].name;
-                        }
-                    }
-                } catch(e) { console.log('Parent context unavailable in sendMessage'); }
-            }
-
-            // 回退到 DOM
-            if (!cName || cName === 'default' || cName === '{{char}}') {
-                const titleEl = document.getElementById('header-title');
-                if (titleEl) cName = titleEl.textContent;
-            }
-            
-            if (!cName || cName === '{{char}}') cName = 'default';
-
-            // 使用插件上传
-            // 传入当前角色名，确保文件保存到正确的角色文件夹下
-            const result = await window.parent.__fayePhoneSupport_upload(pendingFile, cName);
-            
-            if (result && result.url) {
-                if (pendingFile.type.startsWith('image/')) {
-                    // NEW: 使用 Base64 而不是路径来传递给 AI
-                    // 根据 TavernHelper 接口文档，image 参数支持 Base64 字符串，这比相对路径更可靠
-                    const base64Data = await toBase64(pendingFile);
-                    lastUploadedImageForAI = base64Data;
-
-                    // 使用 Web URL 显示图片
-                    await sendPhoto(result.url);
-                } else if (pendingFile.type.startsWith('audio/')) {
-                    await sendRealAudio(result.url);
-                } else if (pendingFile.type.startsWith('video/')) {
-                    await sendVideo(result.url);
+                    } catch(e) { console.log('Parent context unavailable in sendMessage'); }
                 }
+                if (!cName || cName === 'default' || cName === '{{char}}') {
+                    const titleEl = document.getElementById('header-title');
+                    if (titleEl) cName = titleEl.textContent;
+                }
+                if (!cName || cName === '{{char}}') cName = 'default';
+                // 使用插件上传
+                const result = await window.parent.__fayePhoneSupport_upload(pendingFile, cName);
+                if (result && result.url) {
+                    if (pendingFile.type.startsWith('image/')) {
+                        // 1. base64 用于 AI 识图
+                        const base64Data = await toBase64(pendingFile);
+                        lastUploadedImageForAI = base64Data;
+                        // 2. url 用于消息显示
+                        await sendPhoto(result.url);
+                    } else if (pendingFile.type.startsWith('audio/')) {
+                        await sendRealAudio(result.url);
+                    } else if (pendingFile.type.startsWith('video/')) {
+                        await sendVideo(result.url);
+                    }
+                }
+            } catch (err) {
+                console.error("Plugin upload failed:", err);
+                alert("图片上传失败: " + (err.message || "未知错误"));
             }
-        } catch (err) {
-            console.error("Plugin upload failed:", err);
-            // 失败不再回退到 Base64，而是提示错误，避免乱码
-            alert("图片上传失败: " + (err.message || "未知错误"));
+        } else {
+            alert('未检测到适配器插件，无法发送文件。请安装 FayephoneSupport 插件。');
         }
-    } else {
-        // 无插件 - 禁止上传
-        alert('未检测到适配器插件，无法发送文件。请安装 FayephoneSupport 插件。');
+        window.clearPreview();
     }
-    // 发送完文件清理预览
-    window.clearPreview();
-}
 
 // 2. 处理文字消息
 if (text) {
@@ -2038,18 +2538,15 @@ if (text) {
     await rebuildAndSaveHistory();
 } 
 
-// 3. 触发回复逻辑
-// 修改逻辑：确保发送任何内容（文本或文件）后都触发AI生成。
-// 之前版本可能禁用了文本自动回复导致用户困惑，或因重复监听导致双重回复。
-// 现已修复监听器逻辑，故恢复标准生成逻辑。
-if (typeof generate !== 'undefined') {
+// 3. 触发AI回复逻辑：只有输入框为空且无文件时才触发AI
+if (!text && !pendingFile && typeof generate !== 'undefined') {
     // 稍作延迟，确保DOM和History更新完毕
     setTimeout(() => {
         showTypingIndicator(); 
         triggerGenerate();
     }, 100);
 }
-renderMessageList();
+// renderMessageList(); // 暂不刷新列表，避免跳动，sendMessage只更新当前聊天窗口
 }
 
 function getTime() {
@@ -2090,6 +2587,43 @@ if(!chatMessages) return;
 if (msg.header && (msg.header.includes('【搜索记录') || msg.header.includes('【日记') || msg.type === 'search-history')) return;
 // 额外检查消息体，防止解析失败导致日记显示
 if (msg.body && (msg.body.startsWith('【日记') || msg.body.startsWith('【搜索记录') || msg.body.includes('<riji:') || msg.body.includes('<jilu:'))) return;
+
+// 过滤非当前聊天对象的消息（除非是用户自己发的）
+// 用户自己发的消息暂时无法通过 header 区分发给谁，所以总是显示
+// 注意：AI 生成的回复可能带 Header，也可能不带（不带时通常是默认角色）
+// 我们在 parseMessages 中会尽量给每条消息加 Header
+
+// 过滤逻辑：
+// 1. 如果有当前聊天对象，且消息不是用户发的，且消息 Header 中的名字与当前对象不符，则不显示
+if (currentChatTarget && !msg.isUser) {
+    let senderName = null;
+    if (msg.header) {
+        const parts = msg.header.replace(/^\[|\]$|^【|】$/g, '').split('|');
+        if (parts.length > 0) senderName = parts[0];
+    }
+    
+    // 如果当前是群聊，则 Header 中的发送者应该是群成员之一
+    // 但我们的 Tag 是 group:NameCount
+    let isValid = false;
+    
+    // 检查是否在群聊中
+    const isGroup = currentChatTag && currentChatTag.startsWith('group:');
+    if (isGroup) {
+         // 群聊模式：只要消息不是来自用户，我们通常都显示，因为这是群聊历史的一部分。
+         // 但这只有在读取历史时有效。如果是实时生成，我们需要 AI 配合。
+         isValid = true;
+    } else {
+        // 私聊模式
+        const mainCharName = window.charName || '{{char}}';
+        // 如果没有 senderName，默认视为当前角色
+        if (!senderName) senderName = mainCharName;
+        
+        if (senderName === currentChatTarget) isValid = true;
+    }
+    
+    if (!isValid) return;
+}
+
 
 // NEW: 处理撤回消息
 if (msg.header && msg.header.includes('|撤回|')) {
@@ -2144,15 +2678,28 @@ if (msg.body && typeof msg.body === 'string') {
     }
 }
 
-const avatar = document.createElement('img'); avatar.className = 'avatar'; avatar.src = msg.isUser ? appSettings.userAvatar : appSettings.charAvatar;
+// 群聊成员头像始终用默认头像
+let avatarSrc;
+let displayName = msg.isUser ? (window.userName || '{{user}}') : (window.charName || '{{char}}');
+if (msg.header) {
+    const parts = msg.header.replace(/^[\[【]|[\]】]$/g, '').split('|');
+    if (parts.length > 0 && parts[0]) displayName = parts[0];
+}
+const isGroupChat = currentChatTag && currentChatTag.startsWith('group:');
+if (isGroupChat) {
+    // 群聊成员全部用默认头像
+    avatarSrc = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2IwYjBiMCI+PHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZjJmMmYyIi8+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OS00IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==';
+} else {
+    avatarSrc = msg.isUser ? appSettings.userAvatar : appSettings.charAvatar;
+    // 尝试查找特定成员头像（仅私聊）
+    if (!msg.isUser && appSettings.memberAvatars && appSettings.memberAvatars[displayName]) {
+        avatarSrc = appSettings.memberAvatars[displayName];
+    }
+}
+const avatar = document.createElement('img'); avatar.className = 'avatar'; avatar.src = avatarSrc;
 
 const container = document.createElement('div'); container.className = 'msg-container';
 const nameEl = document.createElement('div'); nameEl.className = 'msg-name';
-let displayName = msg.isUser ? (window.userName || '{{user}}') : (window.charName || '{{char}}');
-if (msg.header) {
-const parts = msg.header.replace(/^\[|\]$|^【|】$/g, '').split('|');
-if (parts.length > 0 && parts[0]) displayName = parts[0];
-}
 nameEl.textContent = displayName;
 container.appendChild(nameEl);
 
@@ -2318,70 +2865,101 @@ row.appendChild(avatar); row.appendChild(container); chatMessages.appendChild(ro
 }
 
 async function rebuildAndSaveHistory() {
-try { if (typeof getCurrentMessageId === 'undefined') return; const cn = window.charName || '{{char}}'; const rows = Array.from(chatMessages.children); let nc = '';
-for (const row of rows) {
-if (row.id === 'typing-bubble' || row.classList.contains('delete-btn')) continue;
-const el = row.querySelector('.bubble, .location-card, .transfer-card, .file-card, .voice-card, .real-audio-card, .photo-card, .sticker-bubble, .recall-notice'); if (!el) continue;
-let t = "", h = el.dataset.fullHeader;
-const thoughtEl = row.querySelector('.msg-thought');
-const thoughtSuffix = thoughtEl ? `*${thoughtEl.textContent}*` : '';
-if (el.classList.contains('bubble')) t = el.textContent;
-else if (el.classList.contains('recall-notice')) t = el.dataset.rawBody;
-else if (el.classList.contains('location-card')) t = el.querySelector('.location-name').textContent;
-else if (el.classList.contains('transfer-card')) t = `${el.querySelector('.transfer-amount').textContent}|${el.querySelector('.transfer-note').textContent}`;
-else if (el.classList.contains('file-card')) t = el.querySelector('.file-name').textContent;
-else if (el.classList.contains('voice-card')) t = `${el.querySelector('.voice-duration').textContent.replace('"','')}|${el.querySelector('.voice-text').textContent}`;
-else if (el.classList.contains('real-audio-card')) t = el.querySelector('audio').getAttribute('src');
-else if (el.classList.contains('sticker-bubble')) { t = el.dataset.stickerBody || el.querySelector('img').src; }
-else if (el.classList.contains('photo-card')) {
-    const img = el.querySelector('img');
-    const vid = el.querySelector('video');
-    if (img) {
-        // 修改：直接信任插件返回的 /user/images/ 路径
-        // 仅进行基本的 URL 编码以防止历史记录解析错误（特别是针对括号和空格）
-        let src = img.getAttribute('src');
-        try { src = decodeURI(src); } catch(e) {}
-        
-        let promptPath = src;
-        
-        // 如果包含本地 UserUploads（例如从旧历史记录加载或拖拽上传），尝试修复为 Web 路径
-        // 但按指令，我们主要保证插件上传的新图片路径正确
-        if (promptPath.includes('UserUploads')) {
-             const parts = promptPath.split('UserUploads');
-             let suffix = parts[1];
-             // 确保 Web 路径以 /user/images/ 开头
-             promptPath = '/user/images' + (suffix.startsWith('/') ? '' : '/') + suffix;
-        }
+try { 
+    if (typeof getCurrentMessageId === 'undefined') return; 
 
-        // 规范化斜杠
-        promptPath = promptPath.replace(/\\/g, '/');
-
-        // 仅对空格和括号进行编码，保持中文字符可读，避免乱码
-        const encodedPath = promptPath.replace(/ /g, '%20').replace(/\(/g, '%28').replace(/\)/g, '%29');
+    // 1. 获取当前 DOM 中的最新聊天内容 (Current active chat)
+    const cn = window.charName || '{{char}}'; 
+    const rows = Array.from(chatMessages.children); 
+    let nc = '';
+    
+    for (const row of rows) {
+        if (row.id === 'typing-bubble' || row.classList.contains('delete-btn')) continue;
+        const el = row.querySelector('.bubble, .location-card, .transfer-card, .file-card, .voice-card, .real-audio-card, .photo-card, .sticker-bubble, .recall-notice'); 
+        if (!el) continue;
         
-        t = `<img>${encodedPath}</img>`;
+        let t = "", h = el.dataset.fullHeader;
+        const thoughtEl = row.querySelector('.msg-thought');
+        const thoughtSuffix = thoughtEl ? `*${thoughtEl.textContent}*` : '';
         
-        if (h) {
-            h = h.replace(/^【/, '[').replace(/】$/, ']');
-            if (!h.includes('|图片|')) {
-                 const content = h.replace(/^\[|\]$/g, '');
-                 const parts = content.split('|');
-                 if (parts.length >= 2) {
-                     const name = parts.pop(); // The last part is time
-                     // Reconstruct properly
-                     h = `[${content}|图片]`; // Simplification to avoid complex parsing
-                     // Actually let's just keep original header if complex
+        // ... (提取文本逻辑保持不变) ...
+        if (el.classList.contains('bubble')) t = el.textContent;
+        else if (el.classList.contains('recall-notice')) t = el.dataset.rawBody;
+        else if (el.classList.contains('location-card')) t = el.querySelector('.location-name').textContent;
+        else if (el.classList.contains('transfer-card')) t = `${el.querySelector('.transfer-amount').textContent}|${el.querySelector('.transfer-note').textContent}`;
+        else if (el.classList.contains('file-card')) t = el.querySelector('.file-name').textContent;
+        else if (el.classList.contains('voice-card')) t = `${el.querySelector('.voice-duration').textContent.replace('"','')}|${el.querySelector('.voice-text').textContent}`;
+        else if (el.classList.contains('real-audio-card')) t = el.querySelector('audio').getAttribute('src');
+        else if (el.classList.contains('sticker-bubble')) { t = el.dataset.stickerBody || el.querySelector('img').src; }
+        else if (el.classList.contains('photo-card')) {
+            const img = el.querySelector('img');
+            const vid = el.querySelector('video');
+            if (img) {
+                let src = img.getAttribute('src');
+                try { src = decodeURI(src); } catch(e) {}
+                let promptPath = src;
+                if (promptPath.includes('UserUploads')) {
+                     const parts = promptPath.split('UserUploads');
+                     let suffix = parts[1];
+                     promptPath = '/user/images' + (suffix.startsWith('/') ? '' : '/') + suffix;
+                }
+                promptPath = promptPath.replace(/\\/g, '/');
+                const encodedPath = promptPath.replace(/ /g, '%20').replace(/\(/g, '%28').replace(/\)/g, '%29');
+                t = `<img>${encodedPath}</img>`;
+                if (h) {
+                    h = h.replace(/^【/, '[').replace(/】$/, ']');
+                    if (!h.includes('|图片|')) {
+                         const content = h.replace(/^\[|\]$/g, '');
+                         h = `[${content}|图片]`; 
+                    }
                 }
             }
+            else if (vid) t = vid.getAttribute('src');
         }
+        if (h && t) nc += `${h}${t}${thoughtSuffix}\n`;
     }
-    else if (vid) t = vid.getAttribute('src');
-}
-if (h && t) nc += `${h}${t}${thoughtSuffix}\n`;
-}
-const tn = 'chat', sn = String(cn).replace('{{char}}', window.charName || '{{char}}');
-const fh = `<fphone>\n<${tn}:${sn}>\n${nc.trim()}\n</${tn}>\n</fphone>`;
-await setChatMessages([{ message_id: getCurrentMessageId(), message: fh }], { refresh: 'none' });
+
+    // 2. 读取旧的完整历史记录
+    let allChatsMap = new Map();
+    const history = getChatMessages(getCurrentMessageId());
+    if (history && history[0]) {
+         const m = history[0].message.match(/<fphone>([\s\S]*?)<\/fphone>/i);
+         if (m) {
+             allChatsMap = getAllChatsFromHistory(m[1]);
+         }
+    }
+
+    // 3. 确定当前聊天标签 (Key)
+    let activeTag = currentChatTag;
+    if (!activeTag) {
+        // 如果未设置，默认为主角色私聊
+        const mainChar = window.charName || '{{char}}';
+        activeTag = `chat:${mainChar}`;
+    }
+
+    // 4. 更新当前聊天块的内容
+    allChatsMap.set(activeTag, "\n" + nc.trim() + "\n");
+
+    // 5. 重新拼装完整 XML
+    let newFphoneContent = "";
+    allChatsMap.forEach((content, key) => {
+        // key 格式: "type:name" (e.g., "chat:Alice" or "group:Team5人")
+        // 我们需要拆分成 <type:name>content</type>
+        // 注意：拆分时只取第一个冒号
+        const colonIndex = key.indexOf(':');
+        if (colonIndex > 0) {
+            const type = key.substring(0, colonIndex); // chat or group
+            const name = key.substring(colonIndex + 1); // Alice or Team5人
+            
+            // 构造标签：<chat:Alice>...</chat>
+            // 为了简化正则匹配，结束标签我们统一用 </type>，而不带 ID
+            newFphoneContent += `<${type}:${name}>${content}</${type}>\n`;
+        }
+    });
+
+    const finalMsg = `<fphone>\n${newFphoneContent}</fphone>`;
+    await setChatMessages([{ message_id: getCurrentMessageId(), message: finalMsg }], { refresh: 'none' });
+
 } catch (e) { console.error(e); }
 }
 
@@ -2428,6 +3006,9 @@ eventOn(iframe_events.GENERATION_ENDED, (resp) => {
     // 3. 处理常规聊天消息
     // Filter out <riji> blocks just in case they leaked into normal chat
     rt = rt.replace(/<riji:.*?>[\s\S]*?<\/riji:.*?>/gi, '').replace(/<jilu:.*?>[\s\S]*?<\/jilu:.*?>/gi, '').trim();
+    
+    // 如果返回内容包含 <fphone> 标签（可能是 AI 试图自己生成完整格式），我们只提取当前对话
+    // 但通常 AI 只回复文本。
     rt = rt.replace(/<fphone>|<\/fphone>|<\/?chat(:.*?)?>/gi, '').trim();
 
     // 过滤掉 AI 生成结果中可能包含的用户消息，防止重复显示
@@ -2476,25 +3057,64 @@ return res;
 function loadInitialChat() {
 if(!chatMessages) return;
 chatMessages.innerHTML = '';
-try { if (typeof getCurrentMessageId === 'undefined') return; const h = getChatMessages(getCurrentMessageId()); if (!h?.[0]?.message) return;
-const m = h[0].message.match(/<fphone>([\s\S]*?)<\/fphone>/i); if (!m) return;
-const c = m[1].replace(/<\/?chat(:.*?)?>/gi, '').trim(); parseMessages(c).forEach(msg => renderMessageToUI(msg));
+try { 
+    if (typeof getCurrentMessageId === 'undefined') return; 
+    const h = getChatMessages(getCurrentMessageId()); 
+    if (!h?.[0]?.message) return;
+    
+    const m = h[0].message.match(/<fphone>([\s\S]*?)<\/fphone>/i); 
+    if (!m) return;
+    
+    const allChats = getAllChatsFromHistory(m[1]);
+    
+    // 确定要加载的 Tag
+    let activeTag = currentChatTag;
+    if (!activeTag) {
+        const mainChar = window.charName || '{{char}}';
+        activeTag = `chat:${mainChar}`;
+    }
+    
+    const content = allChats.get(activeTag);
+    if (content) {
+        parseMessages(content).forEach(msg => renderMessageToUI(msg));
+    } else {
+        // 如果是新创建的聊天，还没有历史记录，则为空
+    }
+    
 } catch (e) {}
 }
 
 function triggerGenerate() {
-const cn = window.charName || '{{char}}', t = getTime();
+const cn = currentChatTarget || window.charName || '{{char}}'; // 使用当前聊天对象或默认角色
+const t = getTime();
 let injects = [];
 
 // 1. 基础系统指令：模仿手机短信
+let roleInstruction = `角色：你只能扮演 ${cn} 回复消息，禁止扮演用户说话。`;
+
+// 检查是否为群聊
+let isGroup = false;
+if (currentChatTag && currentChatTag.startsWith('group:')) {
+    isGroup = true;
+    // 尝试从 Tag 解析人数
+    // Tag: group:NameCount人
+    // 我们可以直接告诉 AI 这是个群聊
+    roleInstruction = `角色：你正在一个名为"${cn}"的群聊中。你需要扮演其中的成员进行回复。禁止扮演用户。`;
+}
+
+// 兼容旧版逗号分隔的群聊检测
+if (!isGroup && (cn.includes(',') || cn.includes('，'))) {
+    roleInstruction = `角色：你正在群聊中，你需要扮演 ${cn} 中的一人或多人进行回复。禁止扮演用户。`;
+}
+
 const p = `[系统指令] 当前时间${t}。我们正在进行线上聊天。
 请严格遵守以下规则：
 1. 语境：完全模仿手机聊天软件的风格，使用短句、口语、颜文字。不允许任何动作描写和小说叙述文本。
 2. 格式：请回复 2-5 条简短消息，模拟连续发送。
-3. 角色：你只能扮演 ${cn} 回复消息，禁止扮演用户说话。`;
-    injects.push({ role: 'system', content: p, position: 'at_depth', depth: 0 });
+3. ${roleInstruction}`;
 
-    // 2. 风格强化指令
+    injects.push({ role: 'system', content: p, position: 'at_depth', depth: 0 });
+    // ... (后续指令保持不变) ...
     const p2 = `[样式强制]
 1. 格式：仅输出纯文本消息。禁止使用 Markdown、代码块或 XML 标签。
 2. 语气：休闲、对话式、短信风格。适当使用俚语/表情符号。
@@ -2518,20 +3138,13 @@ const p = `[系统指令] 当前时间${t}。我们正在进行线上聊天。
     };
 
 // 2. 图像识别/多模态逻辑
-// 如果之前上传了图片，并且没有被消费掉，则将其加入到本次生成请求中
 if (lastUploadedImageForAI) {
-    // 酒馆助手 generate 函数的 image 参数支持 File 对象
     genParams.image = lastUploadedImageForAI;
-    
-    // 增加针对图片的引导指令
     const imagePrompt = `[系统指令] 用户发送了一张图片。请调用你的视觉能力分析这张图片。
     重要：不可以直白描述图片内容（如"这是一张..."）。要对根据人物设定对图片做出自然反应（如评价、表达感受、吐槽等），就像在聊天软件中收到这张图一样。`;
     injects.push({ role: 'system', content: imagePrompt, position: 'at_depth', depth: 0 });
-    
-    // 消费掉该变量，防止重复发送
     lastUploadedImageForAI = null;
 }
-
 generate(genParams);
 }
 
@@ -2613,7 +3226,7 @@ modal = document.getElementById('input-modal');
 modalTitle = document.getElementById('modal-title');
 modalInputsContainer = document.getElementById('modal-inputs-container');
 modalConfirmBtn = document.getElementById('modal-confirm-btn');
-chatSettingsModal = document.getElementById('chat-settings-modal');
+chatSettingsScreen = document.getElementById('chat-settings-screen');
 headerTitle = document.getElementById('header-title');
 clockEl = document.getElementById('clock');
 homeClockEl = document.getElementById('home-clock');
@@ -2629,6 +3242,7 @@ adapterStatus = document.getElementById('adapter-status');
 darkSearchScreen = document.getElementById('dark-search-screen');
 darkSearchInput = document.getElementById('dark-search-input');
 diaryScreen = document.getElementById('diary-screen');
+addContactModal = document.getElementById('add-contact-modal');
 
 // Bind Events
 // 图片上传
@@ -2706,23 +3320,38 @@ if (settingsFileInput) {
                 }
 
                 if (url) {
+                    // 只存url路径，避免base64撑爆localStorage
                     if (currentSettingsUploadType === 'char-avatar') {
-                        // 仅更新预览和临时设置对象，不立即保存到 localStorage
                         appSettings.charAvatar = url;
-                        const preview = document.getElementById('preview-char-avatar');
-                        if(preview) preview.src = url;
+                        renderAvatarSettings();
+                        saveSettingsToStorage();
                     } else if (currentSettingsUploadType === 'user-avatar') {
                         appSettings.userAvatar = url;
-                        const preview = document.getElementById('preview-user-avatar');
-                        if(preview) preview.src = url;
+                        renderAvatarSettings();
+                        saveSettingsToStorage();
                     } else if (currentSettingsUploadType === 'chat-bg') {
                         appSettings.chatBg = url;
                         const preview = document.getElementById('preview-chat-bg');
                         if(preview) preview.src = url;
+                        saveSettingsToStorage();
                     } else if (currentSettingsUploadType === 'home-bg') {
                         appSettings.homeBg = url;
                         const preview = document.getElementById('preview-home-bg');
                         if(preview) preview.src = url;
+                        saveSettingsToStorage();
+                    } else if (currentSettingsUploadType === 'group-avatar') {
+                        if (!appSettings.groupAvatars) appSettings.groupAvatars = {};
+                        appSettings.groupAvatars[currentChatTag] = url;
+                        renderAvatarSettings();
+                        saveSettingsToStorage();
+                    } else if (currentSettingsUploadType && currentSettingsUploadType.startsWith('member:')) {
+                        const memberName = currentSettingsUploadType.split(':')[1];
+                        if (memberName) {
+                            if (!appSettings.memberAvatars) appSettings.memberAvatars = {};
+                            appSettings.memberAvatars[memberName] = url;
+                            renderAvatarSettings();
+                            saveSettingsToStorage();
+                        }
                     }
                 }
             } catch (err) {
@@ -2769,6 +3398,9 @@ const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy5
 if(!appSettings.charAvatar) appSettings.charAvatar = defaultAvatar;
 if(!appSettings.userAvatar) appSettings.userAvatar = defaultAvatar;
 applySettings();
+// Store initial char name for stability (fix reset issue)
+const hTitle = document.getElementById('header-title');
+initialCharName = window.charName || (hTitle ? hTitle.textContent : null);
 if(headerTitle) headerTitle.textContent = window.charName || '{{char}}';
 updateClock();
 initStickers();
@@ -2798,12 +3430,29 @@ window.searchDarkWeb = searchDarkWeb;
 window.openDiary = openDiary;
 window.closeDiary = closeDiary;
 window.generateDiary = generateDiary;
+window.openAddContactModal = openAddContactModal;
+window.closeAddContactModal = closeAddContactModal;
+window.switchContactTab = switchContactTab;
+window.renderGroupInputs = renderGroupInputs;
+window.confirmAddContact = confirmAddContact;
+window.closeChatSettings = closeChatSettings;
+window.deleteCurrentChat = deleteCurrentChat;
 
 // Initialize on Load
 if (document.readyState === 'loading') {
-document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', () => { init(); setScreenDisplay(); });
 } else {
-init();
+    init(); setScreenDisplay();
+}
+
+function setScreenDisplay() {
+    if (homeScreen) homeScreen.style.display = 'flex';
+    if (chatScreen) chatScreen.style.display = 'none';
+    if (settingsScreen) settingsScreen.style.display = 'none';
+    if (messageListScreen) messageListScreen.style.display = 'none';
+    if (darkSearchScreen) darkSearchScreen.style.display = 'none';
+    if (diaryScreen) diaryScreen.style.display = 'none';
+    if (chatSettingsScreen) chatSettingsScreen.style.display = 'none';
 }
 })();
 </script>
