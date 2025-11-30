@@ -369,7 +369,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 .avatar { width: 38px; height: 38px; border-radius: 6px; background-color: #e0e0e0; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.05); margin-top: 0; }
 
 /* 消息内容容器：包含名字、气泡、心声等 */
-.msg-container { display: flex; flex-direction: column; max-width: 70%; }
+.msg-container { display: flex; flex-direction: column; max-width: calc(var(--phone-width-px, 330px) * 0.65); }
 .message-row.sent .msg-container { align-items: flex-end; }
 .message-row.received .msg-container { align-items: flex-start; }
 
@@ -2032,6 +2032,8 @@ if(phoneContainer) {
     phoneContainer.style.borderColor = appSettings.caseColor;
     phoneContainer.style.backgroundColor = appSettings.caseColor; // 修复圆角缝隙：背景色跟随手机壳颜色
 }
+// 设置 CSS 变量，确保气泡宽度基于手机宽度
+document.documentElement.style.setProperty('--phone-width-px', (appSettings.phoneWidth || 330) + 'px');
 if(homeScreen) {
     if (appSettings.homeBg) homeScreen.style.backgroundImage = `url(${appSettings.homeBg})`;
     else { homeScreen.style.backgroundImage = 'none'; homeScreen.style.backgroundColor = '#f3e5f5'; }
@@ -2069,6 +2071,21 @@ rootStyle.setProperty('--chat-btn-color', btnRgba);
 rootStyle.setProperty('--chat-btn-text', appSettings.chatBtnText || '#2ea0a0');
 
 updateStatusBar('home'); loadInitialChat();
+// 通知加载器（父窗口）当前尺寸，用于调整 iframe
+try { sendResizeToParent(); } catch(e) {}
+}
+
+// 将当前 phone 容器尺寸发送到父窗口（加载器），让 loader 能够调整 iframe 大小
+function sendResizeToParent() {
+    try {
+        if (!phoneContainer) return;
+        const style = window.getComputedStyle(phoneContainer);
+        const w = parseInt(style.width) || phoneContainer.offsetWidth || (appSettings.phoneWidth || 330);
+        const h = parseInt(style.height) || phoneContainer.offsetHeight || (appSettings.phoneHeight || 660);
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'fayephone-resize', width: w, height: h }, '*');
+        }
+    } catch (e) { console.warn('sendResizeToParent error', e); }
 }
 
 function handleUploadUrl(targetId) {
