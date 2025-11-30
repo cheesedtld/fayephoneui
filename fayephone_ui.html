@@ -2032,8 +2032,6 @@ if(phoneContainer) {
     phoneContainer.style.borderColor = appSettings.caseColor;
     phoneContainer.style.backgroundColor = appSettings.caseColor; // 修复圆角缝隙：背景色跟随手机壳颜色
 }
-// 设置 CSS 变量，确保气泡宽度基于手机宽度
-document.documentElement.style.setProperty('--phone-width-px', (appSettings.phoneWidth || 330) + 'px');
 if(homeScreen) {
     if (appSettings.homeBg) homeScreen.style.backgroundImage = `url(${appSettings.homeBg})`;
     else { homeScreen.style.backgroundImage = 'none'; homeScreen.style.backgroundColor = '#f3e5f5'; }
@@ -2069,23 +2067,10 @@ rootStyle.setProperty('--msg-font-size', (appSettings.fontSize || 14) + 'px');
 const btnRgba = hexToRgba(appSettings.chatBtnColor || '#f2b5b6', 0.6);
 rootStyle.setProperty('--chat-btn-color', btnRgba);
 rootStyle.setProperty('--chat-btn-text', appSettings.chatBtnText || '#2ea0a0');
+// 手机宽度变量（用于计算气泡最大宽度），默认330px
+rootStyle.setProperty('--phone-width-px', ((appSettings.phoneWidth && !isNaN(appSettings.phoneWidth)) ? appSettings.phoneWidth : 330) + 'px');
 
 updateStatusBar('home'); loadInitialChat();
-// 通知加载器（父窗口）当前尺寸，用于调整 iframe
-try { sendResizeToParent(); } catch(e) {}
-}
-
-// 将当前 phone 容器尺寸发送到父窗口（加载器），让 loader 能够调整 iframe 大小
-function sendResizeToParent() {
-    try {
-        if (!phoneContainer) return;
-        const style = window.getComputedStyle(phoneContainer);
-        const w = parseInt(style.width) || phoneContainer.offsetWidth || (appSettings.phoneWidth || 330);
-        const h = parseInt(style.height) || phoneContainer.offsetHeight || (appSettings.phoneHeight || 660);
-        if (window.parent && window.parent !== window) {
-            window.parent.postMessage({ type: 'fayephone-resize', width: w, height: h }, '*');
-        }
-    } catch (e) { console.warn('sendResizeToParent error', e); }
 }
 
 function handleUploadUrl(targetId) {
