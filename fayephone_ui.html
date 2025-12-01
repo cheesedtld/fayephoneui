@@ -1103,7 +1103,7 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
         <div style="display: flex; align-items: center; gap: 10px;">
             <div id="call-name" style="font-size: 26px; font-weight: 600; letter-spacing: 1px;">{{char}}</div>
         </div>
-        <div id="call-timer" style="font-size: 16px; opacity: 0.6; font-variant-numeric: tabular-nums;">00:00</div>
+        <div id="call-timer" style="font-size: 16px; opacity: 0.6; font-variant-numeric: tabular-nums; position: relative; top: -2px;">00:00</div>
     </div>
     
     <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; flex: 1; justify-content: center; width: 100%;">
@@ -1155,7 +1155,7 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 
     <div style="width: 100%; display: flex; flex-direction: column; gap: 30px;">
         <div style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 25px; backdrop-filter: blur(10px);">
-            <input type="text" id="call-input" placeholder="我想说..." style="flex: 1; height: 32px; line-height: 32px; padding: 0 15px; border-radius: 20px; border: none; outline: none; background: transparent; color: #fff; font-size: 15px; margin-top: 2px;">
+            <input type="text" id="call-input" placeholder="我想说..." style="flex: 1; height: 32px; line-height: 32px; padding: 0 15px; border-radius: 20px; border: none; outline: none; background: transparent; color: #fff; font-size: 15px; margin-top: 6px;">
             <button onclick="sendCallMessage()" style="width: 32px; height: 32px; border-radius: 50%; border: none; background: #333; color: #888; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; padding: 0; margin-left: 5px;">
                 <div style="width: 20px; height: 20px; background-color: currentColor; -webkit-mask: url('https://api.iconify.design/typcn:phone.svg') no-repeat center / contain; mask: url('https://api.iconify.design/typcn:phone.svg') no-repeat center / contain;"></div>
             </button>
@@ -1231,19 +1231,19 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 (function() {
 // Global Variables
 const defaultAppSettings = {
-charBubble: '#FFC9CB', charText: '#474747', charAvatar: '',
-userBubble: '#FFA8AC', userText: '#5C5C5C', userAvatar: '',
-chatBg: 'https://file.zhuyitai.com/feedback/202511/22/96c39311d8df6d1d6a89984630585a70.jpeg', chatBgIsDark: false,
+charBubble: '#001C77', charText: '#C2C2C2', charAvatar: '',
+userBubble: '#016E8F', userText: '#C2C2C2', userAvatar: '',
+chatBg: 'https://files.catbox.pengcyril.dpdns.org/xzz81x.jpeg', chatBgIsDark: false,
 homeBg: 'https://intellcs.sinosafe.com.cn/immessage/api/v1/message/attachment/download?groupName=group1&authorization=EnAfMjUzaQVz&fileName=M00/00/A7/CgND1WkhtDSADV5WAANPQ4JuHoI63.jpeg', homeBgIsDark: false,
 iconBg: '#003673', iconColor: '#00885A',
 caseColor: '#707070', phoneWidth: '330', phoneHeight: '660',
 homeTextColor: '#749594',
 interfaceColor: '#ffc7c8',
-msgNameColor: '#858585',
-msgTimeColor: '#999999',
+msgNameColor: '#C2C2C2',
+msgTimeColor: '#ADADAD',
 fontSize: 14, // 默认字体大小
-chatBtnColor: '#f2b5b6', // 按钮背景色
-chatBtnText: '#580000', // 按钮文字/图标色
+chatBtnColor: '#A7C6FF', // 按钮背景色
+chatBtnText: '#A7C6FF', // 按钮文字/图标色
 customTime: '', // 格式 HH:MM，为空则使用系统时间
 timeOffset: 0, // 时间偏移量 (ms)
 blockChar: false, // User blocks Char
@@ -3526,6 +3526,32 @@ const p = `[系统指令] 当前时间${t}。我们正在进行线上聊天。
         const blockPrompt = `[系统通知] 你已将用户拉黑。你无法看到用户的消息内容（显示为被拦截）。请无视用户的发言，或者自说自话。`;
         injects.push({ role: 'system', content: blockPrompt, position: 'at_depth', depth: 0 });
     }
+
+    // 4. 语音通话功能说明
+    const p_call = `[语音通话功能说明]
+发起通话
+向{{user}}发起语音通话邀请。
+规则：
+- 发起通话时，仅输出以下格式，不得附加任何其他信息格式、文字、说明或内心活动。
+- 格式：[名字|发起通话|时间]发起语音通话…
+  示例：
+  [char|发起通话|21:23]发起语音通话…
+语音通话中
+与{{user}}进行实时语音通话对话。
+规则：
+1. 通话不包含任何内心独白，不输出星号（*）包裹的内心活动。
+2. 环境音效、语气或动作提示，使用括号标注，例如：
+   （被子摩擦的声音） （轻轻叹一口气）
+3. 通话内容必须严格遵循以下格式：
+   [名字|通话|时间]对话内容
+   示例：
+   [char|通话|12:23]（调整呼吸）喂？听得见吗？我看你消息回得那么急，赶紧就拨过来了。
+关键注意：
+- [名字|发起通话|时间] 仅用于发起通话邀请，表示呼叫开始。
+- [名字|通话|时间] 仅用于通话接通后的实时对话，表示双方已接通并正在交流。
+- 一旦{{user}}接听电话，必须立即切换至通话格式。
+- 未接通电话则普通消息文本格式`;
+    injects.push({ role: 'system', content: p_call, position: 'at_depth', depth: 1 });
 
     const genParams = { 
         injects: injects, 
