@@ -354,7 +354,7 @@ input:checked + .slider:before { transform: translateX(20px); }
     position: absolute; bottom: -20px; font-size: 24px; animation: floatUp 4s ease-in-out forwards; opacity: 0;
 }
 /* Typing indicator without avatar: make bubble align like received messages */
-.typing-only { margin-left: 42px; border-radius: 12px; }
+.typing-only { margin-left: 0; border-radius: 12px; }
 
 /* Group badge near name: 5px spacing and slight upward offset */
 .group-badge { font-size:10px; color:#999; background:#f0f0f0; padding:1px 4px; border-radius:4px; margin-left:5px; position:relative; top:-1px; }
@@ -385,7 +385,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 .avatar { width: 38px; height: 38px; border-radius: 6px; background-color: #e0e0e0; object-fit: cover; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.05); margin-top: 0; }
 
 /* 消息内容容器：包含名字、气泡、心声等 */
-.msg-container { display: flex; flex-direction: column; max-width: calc(var(--phone-width-px, 330px) * 0.65); }
+.msg-container { display: flex; flex-direction: column; max-width: 65%; }
 .message-row.sent .msg-container { align-items: flex-end; }
 .message-row.received .msg-container { align-items: flex-start; }
 
@@ -852,7 +852,7 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 <div id="action-menu">
 <div class="action-item" onclick="handleAction('photo')"><div class="action-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></div><span>照片</span></div>
 <div class="action-item" onclick="handleAction('voice')"><div class="action-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg></div><span>语音</span></div>
-<div class="action-item disabled" onclick="handleAction('call')"><div class="action-icon-box" style="opacity: 0.5;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></div><span>通话</span></div>
+<div class="action-item" onclick="handleAction('call')"><div class="action-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></div><span>通话</span></div>
 <div class="action-item" onclick="handleAction('camera')"><div class="action-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></div><span>相机</span></div>
 <div class="action-item" onclick="handleAction('location')"><div class="action-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div><span>位置</span></div>
 <div class="action-item" onclick="handleAction('transfer')"><div class="action-icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5"><path d="M7 10h14l-4-4"></path><path d="M17 14H3l4 4"></path></svg></div><span>转账</span></div>
@@ -1097,6 +1097,136 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 <button class="modal-btn btn-save" onclick="saveChatSettings()" style="flex: 1; border-radius: 12px; padding: 8px 0; box-shadow: none; font-size: 13px;">保存配置</button>
 </div>
 </div>
+
+<div id="call-screen" class="screen" style="background: linear-gradient(180deg, #2b2b2b 0%, #1a1a1a 100%); color: #fff; flex-direction: column; align-items: center; justify-content: space-between; padding: 60px 20px 40px 20px; z-index: 100; box-sizing: border-box;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div id="call-name" style="font-size: 26px; font-weight: 600; letter-spacing: 1px;">{{char}}</div>
+        </div>
+        <div id="call-timer" style="font-size: 16px; opacity: 0.6; font-variant-numeric: tabular-nums;">00:00</div>
+    </div>
+    
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; flex: 1; justify-content: center; width: 100%;">
+        <div style="position: relative;">
+            <img id="call-avatar" src="" style="width: 120px; height: 120px; border-radius: 20px; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
+            <div class="ripple-ring"></div>
+        </div>
+        
+        <!-- Middle Message Area -->
+        <div id="call-chat-container" style="width: 100%; padding: 0 10px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; height: 200px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;">
+            <!-- Call bubbles will be injected here -->
+        </div>
+        <style>
+            #call-chat-container::-webkit-scrollbar { display: none; }
+            .call-bubble {
+                max-width: 80%;
+                padding: 8px 12px;
+                border-radius: 16px;
+                font-size: 14px;
+                line-height: 1.4;
+                word-break: break-word;
+                animation: fadeIn 0.3s ease;
+            }
+            .call-bubble.sent {
+                align-self: flex-end;
+                background: #666666;
+                color: #fff;
+                border-bottom-right-radius: 4px;
+            }
+            .call-bubble.received {
+                align-self: flex-start;
+                background: #333333;
+                color: #fff;
+                border-bottom-left-radius: 4px;
+            }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+            @keyframes jump-exclamation {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-5px); }
+            }
+            .jumping-exclamation {
+                display: inline-block;
+                font-weight: bold;
+                font-size: 18px;
+                animation: jump-exclamation 0.6s infinite;
+            }
+        </style>
+    </div>
+
+    <div style="width: 100%; display: flex; flex-direction: column; gap: 30px;">
+        <div style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 25px; backdrop-filter: blur(10px);">
+            <input type="text" id="call-input" placeholder="我想说..." style="flex: 1; height: 32px; line-height: 32px; padding: 0 15px; border-radius: 20px; border: none; outline: none; background: transparent; color: #fff; font-size: 15px; margin-top: 2px;">
+            <button onclick="sendCallMessage()" style="width: 32px; height: 32px; border-radius: 50%; border: none; background: #333; color: #888; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; padding: 0; margin-left: 5px;">
+                <div style="width: 20px; height: 20px; background-color: currentColor; -webkit-mask: url('https://api.iconify.design/typcn:phone.svg') no-repeat center / contain; mask: url('https://api.iconify.design/typcn:phone.svg') no-repeat center / contain;"></div>
+            </button>
+        </div>
+        
+        <div style="display: flex; justify-content: space-around; align-items: center;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0.5; cursor: not-allowed;">
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center;">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="#fff"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                </div>
+                <span style="font-size: 12px; font-weight: 500;">录音</span>
+            </div>
+            
+            <div onclick="endVoiceCall()" style="display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: transform 0.1s;">
+                <div style="width: 64px; height: 64px; border-radius: 50%; background: #ff3b30; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(255, 59, 48, 0.3);">
+                    <img src="https://api.iconify.design/majesticons:phone-hangup.svg?color=white" width="32" height="32">
+                </div>
+                <span style="font-size: 12px; font-weight: 500;">挂断</span>
+            </div>
+        </div>
+    </div>
+    <style>
+        @keyframes ripple { 0% { transform: scale(1); opacity: 0.4; } 100% { transform: scale(1.5); opacity: 0; } }
+        .ripple-ring { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 20px; border: 2px solid rgba(255,255,255,0.5); animation: ripple 2s infinite; z-index: -1; display: none; }
+        #call-screen.speaking .ripple-ring { display: block; }
+        
+        @keyframes wave-jump {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .jumping-dot {
+            display: inline-block;
+            animation: wave-jump 1s infinite;
+            font-size: 32px; /* 点大一些 */
+            margin: 0 4px;   /* 距离宽一些 */
+            line-height: 10px; /* 防止撑开高度 */
+        }
+        .jumping-dot:nth-child(1) { animation-delay: 0s; }
+        .jumping-dot:nth-child(2) { animation-delay: 0.1s; }
+        .jumping-dot:nth-child(3) { animation-delay: 0.2s; }
+    </style>
+</div>
+
+<div id="incoming-call-screen" class="screen" style="display:none; background: linear-gradient(180deg, #2b2b2b 0%, #1a1a1a 100%); color: #fff; flex-direction: column; align-items: center; justify-content: space-between; padding: 60px 20px 80px 20px; z-index: 110;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+        <div id="incoming-call-name" style="font-size: 26px; font-weight: 600;">{{char}}</div>
+        <div style="font-size: 16px; opacity: 0.6;">邀请你进行语音通话...</div>
+    </div>
+    
+    <div style="position: relative;">
+        <img id="incoming-call-avatar" src="" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <div class="ripple-ring" style="display:block;"></div>
+    </div>
+
+    <div style="width: 100%; display: flex; justify-content: space-around; align-items: center;">
+        <div onclick="declineIncomingCall()" style="display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: #ff3b30; display: flex; align-items: center; justify-content: center;">
+                <img src="https://api.iconify.design/majesticons:phone-hangup.svg?color=white" width="32" height="32">
+            </div>
+            <span style="font-size: 12px;">拒绝</span>
+        </div>
+        
+        <div onclick="acceptIncomingCall()" style="display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: #30d158; display: flex; align-items: center; justify-content: center;">
+                <img src="https://api.iconify.design/majesticons:phone.svg?color=white" width="32" height="32">
+            </div>
+            <span style="font-size: 12px;">接听</span>
+        </div>
+    </div>
+</div>
+
 <script>
 (function() {
 // Global Variables
@@ -2487,7 +2617,7 @@ else if (type === 'voice') {
 }
 else if (type === 'settings') openChatSettings();
 else if (type === 'photo') { if(photoInput) photoInput.click(); }
-else if (type === 'call') { /* 禁用 */ }
+else if (type === 'call') { startVoiceCall(); }
 else if (type === 'camera') { if(videoInput) videoInput.click(); }
 }
 
@@ -2786,8 +2916,15 @@ if (msg.header) {
 }
 const isGroupChat = currentChatTag && currentChatTag.startsWith('group:');
 if (isGroupChat) {
-    // 群聊成员全部用默认头像
-    avatarSrc = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2IwYjBiMCI+PHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZjJmMmYyIi8+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OS00IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==';
+    // 群聊模式：优先使用设置的成员头像
+    if (msg.isUser) {
+        avatarSrc = appSettings.userAvatar;
+    } else if (appSettings.memberAvatars && appSettings.memberAvatars[displayName]) {
+        avatarSrc = appSettings.memberAvatars[displayName];
+    } else {
+        // 默认头像
+        avatarSrc = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2IwYjBiMCI+PHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjZjJmMmYyIi8+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OS00IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==';
+    }
 } else {
     avatarSrc = msg.isUser ? appSettings.userAvatar : appSettings.charAvatar;
     // 尝试查找特定成员头像（仅私聊）
@@ -2812,6 +2949,7 @@ const isVoice = msg.type === 'voice' || (msg.header && msg.header.includes('语�
 const isVideo = msg.type === 'video' || (msg.header && msg.header.includes('视频'));
 let isPhoto = msg.type === 'photo' || (msg.header && msg.header.includes('图片'));
 const isSticker = msg.type === 'sticker' || (msg.header && msg.header.includes('表情包'));
+const isCallMsg = msg.type === 'call_message' || (msg.header && msg.header.includes('通话'));
 
 const timeMatch = msg.header ? msg.header.match(/\|(\d{2}:\d{2})/) : null;
 const timeStr = timeMatch ? timeMatch[1] : getTime();
@@ -2825,7 +2963,7 @@ if (thoughtMatch) { displayBody = thoughtMatch[1].trim(); displayThought = thoug
 }
 
 // Auto-detect Pollinations AI images or Markdown images OR <img> tag images
-if (!isLoc && !isTra && !isFile && !isVoice && !isSticker) {
+if (!isLoc && !isTra && !isFile && !isVoice && !isSticker && !isCallMsg) {
     if (/^!\[.*?\]\(.*?\)$/.test(displayBody) || 
         /^https?:\/\/image\.pollinations\.ai\/prompt\//.test(displayBody) ||
         /^<img>.*?<\/img>$/.test(displayBody)) {
@@ -2857,6 +2995,21 @@ el.innerHTML = `<div class="transfer-top"><div class="transfer-icon-circle"><svg
 } else if (isFile) {
 el = document.createElement('div'); el.className = `file-card ${msg.isUser ? 'sent' : 'received'}`;
 el.innerHTML = `<div class="file-info"><div class="file-name">${displayBody}</div><div class="file-size">128 KB</div></div><div class="file-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="#eee"></path><polyline points="14 2 14 8 20 8" fill="#ddd"></polyline><text x="50%" y="18" font-size="6" fill="#888" text-anchor="middle" font-family="Arial">FILE</text></svg></div>`;
+} else if (isCallMsg) {
+    el = document.createElement('div'); 
+    el.className = `bubble ${msg.isUser ? 'bubble-sent' : 'bubble-received'}`; 
+    // 小圆角长方形，无透明度
+    el.style.borderRadius = '10px';
+    el.style.opacity = '1';
+    el.textContent = displayBody;
+    
+    if (msg.isUser) {
+        el.style.backgroundColor = appSettings.userBubble; 
+        el.style.color = appSettings.userText;
+    } else {
+        el.style.backgroundColor = appSettings.charBubble; 
+        el.style.color = appSettings.charText;
+    }
 } else if (isVoice) {
     // 检查是否是真实音频URL (http开头或characters开头)
     if (displayBody.startsWith('http') || displayBody.startsWith('characters/') || displayBody.startsWith('UserUploads/') || displayBody.startsWith('/user/images/')) {
@@ -2867,11 +3020,13 @@ el.innerHTML = `<div class="file-info"><div class="file-name">${displayBody}</di
     } else {
         // 微信风格模拟语音气泡
         const parts = displayBody.split('|');
-        const dur = Math.max(1, Math.min(60, parseInt(parts[0]) || 5));
+        const dur = Math.max(1, Math.min(45, parseInt(parts[0]) || 5));
         const txt = parts.slice(1).join('|');
-        const minWidth = 50; // 最短气泡宽度（px）
-        const maxWidth = 168; // 最大宽度
-        const width = Math.round(minWidth + (maxWidth - minWidth) * (dur / 60));
+        const minWidth = 66; // 最短气泡宽度（px）
+        // 动态计算最大宽度：手机宽度的 65%
+        const phoneW = (appSettings.phoneWidth && !isNaN(appSettings.phoneWidth)) ? parseInt(appSettings.phoneWidth) : 330;
+        const maxWidth = phoneW * 0.65; 
+        const width = Math.round(minWidth + (maxWidth - minWidth) * (dur / 45));
         el = document.createElement('div'); el.className = `voice-card ${msg.isUser ? 'sent' : 'received'}`; el.style.width = width + 'px';
         // 声纹3~4根
         let waves = '';
@@ -2942,6 +3097,16 @@ if (msg.header && msg.header.includes('!')) isBlocked = true;
 // 创建元数据容器（包含时间和状态图标）
 const metaContainer = document.createElement('div');
 metaContainer.className = 'msg-meta';
+
+if (isCallMsg) {
+    const callIcon = document.createElement('img');
+    callIcon.src = msg.isUser ? "https://api.iconify.design/si:phone-duotone.svg" : "https://api.iconify.design/si:phone-enabled-duotone.svg";
+    callIcon.style.width = '12px';
+    callIcon.style.height = '12px';
+    callIcon.style.marginBottom = '1px';
+    callIcon.style.opacity = '0.6'; // Make it subtle like timestamp
+    metaContainer.appendChild(callIcon);
+}
 
 if (isBlocked) {
     const blockIcon = document.createElement('span');
@@ -3102,6 +3267,20 @@ eventOn(iframe_events.GENERATION_ENDED, (resp) => {
         saveSettingsToStorage();
     }
 
+    // NEW: 处理 AI 发起通话指令 (Header 触发)
+    // 格式: [名字|发起通话|时间]发起通话
+    if (/\[.*?\|发起通话\|.*?\]/.test(rt)) {
+        receiveVoiceCall();
+        // 移除该行/该消息，避免显示在气泡中
+        // 匹配整个带 Header 的行，或者只是 Header + 内容
+        rt = rt.replace(/\[.*?\|发起通话\|.*?\]\s*发起通话/g, '').trim();
+        // 也要处理可能只输出了 Header 的情况
+        rt = rt.replace(/\[.*?\|发起通话\|.*?\]/g, '').trim();
+        
+        // 如果消息体为空，则不继续渲染气泡
+        if (!rt) return;
+    }
+
     // 3. 处理常规聊天消息
     // Filter out <riji> blocks just in case they leaked into normal chat
     rt = rt.replace(/<riji:.*?>[\s\S]*?<\/riji:.*?>/gi, '').replace(/<jilu:.*?>[\s\S]*?<\/jilu:.*?>/gi, '').trim();
@@ -3109,6 +3288,54 @@ eventOn(iframe_events.GENERATION_ENDED, (resp) => {
     // 如果返回内容包含 <fphone> 标签（可能是 AI 试图自己生成完整格式），我们只提取当前对话
     // 但通常 AI 只回复文本。
     rt = rt.replace(/<fphone>|<\/fphone>|<\/?chat(:.*?)?>/gi, '').trim();
+
+    // NEW: 如果正在通话中，更新通话界面文字，不渲染到聊天列表
+    if (isCalling) {
+        hideCallTyping(); // Hide typing indicator
+        
+        const callTextEl = document.getElementById('call-char-text');
+        const callScreen = document.getElementById('call-screen');
+        if (callTextEl) {
+            // 移除可能存在的引号，因为UI已经加了
+            let cleanText = rt.replace(/^["“]/, '').replace(/["”]$/, '');
+            callTextEl.textContent = `"${cleanText}"`;
+        }
+        if (callScreen) callScreen.classList.add('speaking');
+        setTimeout(() => { if(callScreen) callScreen.classList.remove('speaking'); }, 3000);
+        
+        // 同时也渲染到聊天列表，作为通话消息
+        const msgs = parseMessages(rt);
+        msgs.forEach(msg => {
+            if (!msg.isUser) {
+                // 强制添加通话标识
+                if (msg.header && !msg.header.includes('通话')) {
+                    // 假设 header 格式为 [Name|Time]
+                    // 我们需要插入 |通话 到 Time 之前
+                    // 匹配 |Time]
+                    if (/\|\d{2}:\d{2}\]$/.test(msg.header)) {
+                        msg.header = msg.header.replace(/\|(\d{2}:\d{2})\]$/, '|通话|$1]');
+                    } else {
+                        // 如果格式不匹配，直接追加
+                        msg.header = msg.header.replace(/\]$/, '|通话]');
+                    }
+                }
+                // 如果没有 header，parseMessages 会生成默认的，这里我们手动覆盖
+                if (!msg.header) {
+                    const cn = window.charName || '{{char}}';
+                    const t = getTime();
+                    msg.header = `[${cn}|通话|${t}]`;
+                }
+                
+                // Add to Call Screen Chat
+                addCallBubble(msg.body, false);
+                
+                renderMessageToUI(msg);
+            }
+        });
+        
+        rebuildAndSaveHistory().then(() => renderMessageList());
+        return;
+    }
 
     // 过滤掉 AI 生成结果中可能包含的用户消息，防止重复显示
     parseMessages(rt).filter(msg => !msg.isUser).forEach(msg => renderMessageToUI(msg)); 
@@ -3223,7 +3450,6 @@ if (isGroup) {
 // 已移除：修改群名对话框函数（功能已弃用）
 
 // 已移除：group rename 功能相关的工具与实现
-
 // 兼容旧版逗号分隔的群聊检测
 if (!isGroup && (cn.includes(',') || cn.includes('，'))) {
     roleInstruction = `角色：你正在群聊中，你需要扮演 ${cn} 中的一人或多人进行回复。禁止扮演用户。`;
@@ -3575,7 +3801,312 @@ function setScreenDisplay() {
     if (darkSearchScreen) darkSearchScreen.style.display = 'none';
     if (diaryScreen) diaryScreen.style.display = 'none';
     if (chatSettingsScreen) chatSettingsScreen.style.display = 'none';
+    if (document.getElementById('call-screen')) document.getElementById('call-screen').style.display = 'none';
 }
+
+// Voice Call Logic
+let isCalling = false;
+let callTimerInterval = null;
+let callSeconds = 0;
+let callConnectionTimeout = null;
+
+function startVoiceCall(isIncoming = false) {
+    closeMenus();
+    const callScreen = document.getElementById('call-screen');
+    const nameEl = document.getElementById('call-name');
+    const avatarEl = document.getElementById('call-avatar');
+    const textEl = document.getElementById('call-char-text');
+    const timerEl = document.getElementById('call-timer');
+    
+    if (!callScreen) return;
+    
+    // Set Info
+    const targetName = currentChatTarget || window.charName || '{{char}}';
+    if (nameEl) nameEl.textContent = targetName;
+    
+    let avatarSrc = appSettings.charAvatar;
+    if (appSettings.memberAvatars && appSettings.memberAvatars[targetName]) {
+        avatarSrc = appSettings.memberAvatars[targetName];
+    }
+    if (avatarEl) avatarEl.src = avatarSrc;
+    
+    // Clear Call Chat Container
+    const callChatContainer = document.getElementById('call-chat-container');
+    if (callChatContainer) callChatContainer.innerHTML = '';
+
+    // Show Screen
+    callScreen.style.display = 'flex';
+    isCalling = true;
+    callSeconds = 0;
+    
+    // Clear previous timers
+    if (callTimerInterval) clearInterval(callTimerInterval);
+    if (callConnectionTimeout) clearTimeout(callConnectionTimeout);
+
+    if (isIncoming) {
+        // Direct Connect for Incoming Call
+        if (timerEl) {
+            timerEl.textContent = '00:00';
+            timerEl.style.opacity = '1';
+        }
+        if (textEl) {
+            textEl.textContent = '通话中';
+            textEl.style.fontSize = '12px';
+            textEl.style.opacity = '0.8';
+        }
+        
+        // Start Timer Immediately
+        callTimerInterval = setInterval(() => {
+            callSeconds++;
+            const m = Math.floor(callSeconds / 60).toString().padStart(2, '0');
+            const s = (callSeconds % 60).toString().padStart(2, '0');
+            if (timerEl) timerEl.textContent = `${m}:${s}`;
+        }, 1000);
+
+        // Trigger AI Greeting (Incoming Call Context)
+        showCallTyping();
+        
+        const injects = [
+            { role: 'system', content: `[系统指令] 你主动给用户拨打了电话，用户已接听。
+请直接开始对话，说明你的来意。
+回复格式要求：
+1. 必须是语音通话的口吻，简短、口语化。
+2. 禁止输出心声或动作描写（除非是声音描写）。
+3. 声音描写（如笑声、叹气）请用括号包裹。
+你的回复将直接显示在通话字幕中。`, position: 'at_depth', depth: 0 }
+        ];
+        
+        if (typeof generate !== 'undefined') {
+            generate({ injects: injects, should_stream: false });
+        }
+
+    } else {
+        // Outgoing Call Logic (Dialing)
+        if (timerEl) {
+            timerEl.textContent = '正在拨打...';
+            timerEl.style.opacity = '0.6';
+        }
+        if (textEl) {
+            textEl.innerHTML = '等待接听<span class="jumping-dot">.</span><span class="jumping-dot">.</span><span class="jumping-dot">.</span>';
+        }
+
+        // Simulate Connection Delay (2-6 seconds)
+        const delay = Math.floor(Math.random() * 4000) + 2000;
+        
+        callConnectionTimeout = setTimeout(() => {
+            // Connected
+            if (timerEl) {
+                timerEl.textContent = '00:00';
+                timerEl.style.opacity = '1';
+            }
+            if (textEl) {
+                textEl.textContent = '对方已接通';
+                textEl.style.fontSize = '12px';
+                textEl.style.opacity = '0.8';
+            }
+            
+            // Start Timer
+            callTimerInterval = setInterval(() => {
+                callSeconds++;
+                const m = Math.floor(callSeconds / 60).toString().padStart(2, '0');
+                const s = (callSeconds % 60).toString().padStart(2, '0');
+                if (timerEl) timerEl.textContent = `${m}:${s}`;
+            }, 1000);
+
+            // Trigger AI Greeting (Outgoing Call Context)
+            showCallTyping();
+            
+            const injects = [
+                { role: 'system', content: `[系统指令] 用户拨打了你的电话。
+请接听电话并打招呼。
+请以语音通话的口吻回复，内容要简短、口语化。
+禁止输出心声。
+包含语音内容和声音描写（如笑声、叹气等），用括号包裹声音描写。
+你的回复将直接显示在通话界面的字幕中。`, position: 'at_depth', depth: 0 }
+            ];
+            
+            if (typeof generate !== 'undefined') {
+                generate({ injects: injects, should_stream: false });
+            }
+            
+        }, delay);
+    }
+    
+    updateStatusBar('dark-search'); // Use dark status bar style
+}
+
+function addCallBubble(text, isUser) {
+    const container = document.getElementById('call-chat-container');
+    if (!container) return;
+    
+    const bubble = document.createElement('div');
+    bubble.className = `call-bubble ${isUser ? 'sent' : 'received'}`;
+    bubble.innerHTML = text; // Use innerHTML to support HTML content like typing indicator
+    
+    container.appendChild(bubble);
+    container.scrollTop = container.scrollHeight;
+    return bubble;
+}
+
+function showCallTyping() {
+    const container = document.getElementById('call-chat-container');
+    if (!container) return;
+    // Remove existing typing indicator if any
+    hideCallTyping();
+    
+    const bubble = document.createElement('div');
+    bubble.id = 'call-typing-indicator';
+    bubble.className = 'call-bubble received';
+    bubble.innerHTML = '<span class="jumping-dot">.</span><span class="jumping-dot">.</span><span class="jumping-dot">.</span>';
+    
+    container.appendChild(bubble);
+    container.scrollTop = container.scrollHeight;
+}
+
+function hideCallTyping() {
+    const el = document.getElementById('call-typing-indicator');
+    if (el) el.remove();
+}
+
+function endVoiceCall() {
+    const callScreen = document.getElementById('call-screen');
+    if (callScreen) callScreen.style.display = 'none';
+    
+    isCalling = false;
+    if (callTimerInterval) clearInterval(callTimerInterval);
+    if (callConnectionTimeout) clearTimeout(callConnectionTimeout);
+    
+    // Stop AI Generation if active
+    if (typeof stopGeneration !== 'undefined') {
+        stopGeneration();
+    }
+    
+    // Add system message to chat
+    let bodyText = "";
+    if (callSeconds > 0) {
+        const m = Math.floor(callSeconds / 60).toString().padStart(2, '0');
+        const s = (callSeconds % 60).toString().padStart(2, '0');
+        bodyText = `通话结束，时长：${m}:${s}`;
+    } else {
+        bodyText = "通话取消";
+    }
+    
+    const t = getTime();
+    const u = window.userName || '{{user}}';
+    
+    // Save to history
+    renderMessageToUI({ header: `[${u}|通话|${t}]`, body: bodyText, isUser: true });
+    rebuildAndSaveHistory();
+    
+    updateStatusBar('chat');
+}
+
+function sendCallMessage() {
+    const input = document.getElementById('call-input');
+    if (!input) return;
+    const text = input.value.trim();
+    // Allow empty text to trigger AI response (silence)
+    
+    input.value = '';
+    
+    // Show User Message in Call Screen (Only if text is not empty)
+    if (text) {
+        addCallBubble(text, true);
+    }
+    
+    // Show Thinking Animation
+    showCallTyping();
+    
+    // Trigger AI
+    const t = getTime();
+    const cn = currentChatTarget || window.charName || '{{char}}';
+    
+    let userActionDesc = `用户说：“${text}”。`;
+    if (!text) {
+        userActionDesc = `用户保持了沉默（没有说话）。`;
+    }
+
+    const injects = [
+        { role: 'system', content: `[系统指令] 当前正在与用户进行语音通话。
+${userActionDesc}
+请以语音通话的口吻回复，内容要简短、口语化。
+禁止输出心声。
+包含语音内容和声音描写（如笑声、叹气等），用括号包裹声音描写。
+你的回复将直接显示在通话界面的字幕中。`, position: 'at_depth', depth: 0 }
+    ];
+    
+    const u = window.userName || '{{user}}';
+    // Only log to history if text is not empty
+    if (text) {
+        renderMessageToUI({ header: `[${u}|通话|${t}]`, body: text, isUser: true });
+        rebuildAndSaveHistory();
+    }
+    
+    if (typeof generate !== 'undefined') {
+        generate({ injects: injects, should_stream: false });
+    }
+}
+
+// Incoming Call Logic
+function receiveVoiceCall() {
+    const incomingScreen = document.getElementById('incoming-call-screen');
+    const nameEl = document.getElementById('incoming-call-name');
+    const avatarEl = document.getElementById('incoming-call-avatar');
+    
+    if (!incomingScreen) return;
+    
+    const targetName = currentChatTarget || window.charName || '{{char}}';
+    if (nameEl) nameEl.textContent = targetName;
+    
+    let avatarSrc = appSettings.charAvatar;
+    if (appSettings.memberAvatars && appSettings.memberAvatars[targetName]) {
+        avatarSrc = appSettings.memberAvatars[targetName];
+    }
+    if (avatarEl) avatarEl.src = avatarSrc;
+    
+    incomingScreen.style.display = 'flex';
+    updateStatusBar('dark-search');
+}
+
+function acceptIncomingCall() {
+    const incomingScreen = document.getElementById('incoming-call-screen');
+    if (incomingScreen) incomingScreen.style.display = 'none';
+    
+    // Start call directly (skip dialing)
+    startVoiceCall(true);
+}
+
+function declineIncomingCall() {
+    const incomingScreen = document.getElementById('incoming-call-screen');
+    if (incomingScreen) incomingScreen.style.display = 'none';
+    updateStatusBar('chat');
+    
+    // Log system message
+    const t = getTime();
+    const u = window.userName || '{{user}}';
+    renderMessageToUI({ header: `[${u}|${t}]`, body: `已拒绝通话`, isUser: true });
+    rebuildAndSaveHistory();
+    
+    // Trigger AI response (Text format)
+    const injects = [
+        { role: 'system', content: `[系统指令] 你给用户拨打了语音通话，但用户拒绝了（挂断）。
+请以普通文字消息回复，表达你的反应（如疑惑、失落或询问原因）。
+禁止使用语音通话格式。`, position: 'at_depth', depth: 0 }
+    ];
+    
+    if (typeof generate !== 'undefined') {
+        generate({ injects: injects, should_stream: false });
+    }
+}
+
+// Expose new functions
+window.startVoiceCall = startVoiceCall;
+window.endVoiceCall = endVoiceCall;
+window.sendCallMessage = sendCallMessage;
+window.receiveVoiceCall = receiveVoiceCall;
+window.acceptIncomingCall = acceptIncomingCall;
+window.declineIncomingCall = declineIncomingCall;
+
 })();
 </script>
 </body>
