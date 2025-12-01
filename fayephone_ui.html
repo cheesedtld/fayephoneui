@@ -2137,8 +2137,8 @@ function loadSettings() {
     appSettings.homeTextColor = globalSettings.homeTextColor;
     appSettings.homeBg = globalSettings.homeBg;
     appSettings.homeBgIsDark = globalSettings.homeBgIsDark;
-    appSettings.customTime = globalSettings.customTime;
-    appSettings.timeOffset = globalSettings.timeOffset;
+    // appSettings.customTime = globalSettings.customTime; // Allow per-character time
+    // appSettings.timeOffset = globalSettings.timeOffset; // Allow per-character time
 
     // 4. 其它兼容性处理
     if (typeof appSettings.blockChar === 'undefined' && typeof currentSettings.blockChar !== 'undefined') appSettings.blockChar = currentSettings.blockChar;
