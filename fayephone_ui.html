@@ -3487,12 +3487,12 @@ if (isGroup) {
         // 构造每个成员的标注：在头像列表中/不在头像列表中
         const memberLines = memberList.map(m => {
             const isPresent = (appSettings.memberAvatars && (appSettings.memberAvatars[m] || (m === myName && appSettings.memberAvatars[m])));
-            return `- ${m} (${isPresent ? '已设置头像' : '未设置头像'})`;
+            return `- ${m} (${isPresent ? '在头像列表中' : '未在头像列表中'})`;
         });
 
         const p_members = `[群成员详细信息]
 ${memberLines.length ? memberLines.join('\n') : '- （无成员信息）'}
-请优先扮演已设置头像的活跃成员。`;
+请扮演头像列表中的成员的性格进行扮演，未再头像列表中的成员说明不在群里。`;
         injects.push({ role: 'system', content: p_members, position: 'at_depth', depth: 1 });
     } catch (e) { /* ignore */ }
 }
