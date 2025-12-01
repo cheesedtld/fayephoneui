@@ -3440,18 +3440,41 @@ function triggerGenerate() {
 const cn = currentChatTarget || window.charName || '{{char}}'; // 使用当前聊天对象或默认角色
 const t = getTime();
 let injects = [];
+const myName = window.userName || '{{user}}';
 
 // 1. 基础系统指令：模仿手机短信
-let roleInstruction = `角色：你只能扮演 ${cn} 回复消息，禁止扮演用户说话。`;
+let roleInstruction = "";
 
 // 检查是否为群聊
 let isGroup = false;
 if (currentChatTag && currentChatTag.startsWith('group:')) {
     isGroup = true;
-    // 尝试从 Tag 解析人数
-    // Tag: group:NameCount人
-    // 我们可以直接告诉 AI 这是个群聊
-    roleInstruction = `角色：你正在一个名为"${cn}"的群聊中。你需要扮演其中的成员进行回复。禁止扮演用户。`;
+    const groupName = currentChatTag.replace(/^group:/, '');
+    
+    // 获取群成员
+    let memberList = [];
+    const g = (appSettings.groups || []).find(x => x.name === groupName);
+    if (g && Array.isArray(g.members)) memberList = g.members.slice();
+    
+    const memberStr = memberList.length > 0 ? memberList.join(', ') : '未知';
+
+    roleInstruction = `[场景模式：多人群聊]
+当前群组名称：${groupName}
+群内成员名单：[${memberStr}]
+当前用户：${myName}
+指令要求：
+1. 你需要根据对话上下文，扮演【群成员名单】中的一位或多位成员进行回复。
+2. 严禁扮演用户（${myName}）发言。
+3. 严禁虚构不在名单中的人物发言。`;
+
+} else {
+    // 私聊
+    roleInstruction = `[场景模式：一对一私聊]
+聊天对象：${cn}
+当前用户：${myName}
+指令要求：
+1. 你只能扮演 ${cn} 回复消息。
+2. 严禁扮演用户（${myName}）说话。`;
 }
 
 // 如果是群聊，生成一条系统提示，列出当前群聊成员并标注头像列表中是否存在
@@ -3463,22 +3486,21 @@ if (isGroup) {
         if (g && Array.isArray(g.members)) memberList = g.members.slice();
         // 构造每个成员的标注：在头像列表中/不在头像列表中
         const memberLines = memberList.map(m => {
-            const myName = window.userName || '{{user}}';
-            const isPresent = (appSettings.memberAvatars && (appSettings.memberAvatars[m] || appSettings.memberAvatars[myName] && m === myName));
-            return `- ${m} (${isPresent ? '头像列表中' : '未在头像列表'})`;
+            const isPresent = (appSettings.memberAvatars && (appSettings.memberAvatars[m] || (m === myName && appSettings.memberAvatars[m])));
+            return `- ${m} (${isPresent ? '已设置头像' : '未设置头像'})`;
         });
 
-        const p_members = `[群成员信息] 当前群聊："${groupName}" 的成员如下（来源：本地配置 appSettings.groups）：\n${memberLines.length ? memberLines.join('\n') : '- （无成员信息）'}\n\n重要：在角色扮演时，严禁新增不存在于此名单的成员；仅使用上面列出的名字进行回复。\n若名单中不包含 {{user}}，请理解当前用户不在此群（被视为非群成员）。`;
+        const p_members = `[群成员详细信息]
+${memberLines.length ? memberLines.join('\n') : '- （无成员信息）'}
+请优先扮演已设置头像的活跃成员。`;
         injects.push({ role: 'system', content: p_members, position: 'at_depth', depth: 1 });
     } catch (e) { /* ignore */ }
 }
 
-// 已移除：修改群名对话框函数（功能已弃用）
-
-// 已移除：group rename 功能相关的工具与实现
-// 兼容旧版逗号分隔的群聊检测
+// 兼容旧版逗号分隔的群聊检测 (如果不是通过 group: 标签进入，但名字里有逗号)
 if (!isGroup && (cn.includes(',') || cn.includes('，'))) {
-    roleInstruction = `角色：你正在群聊中，你需要扮演 ${cn} 中的一人或多人进行回复。禁止扮演用户。`;
+    roleInstruction = `[场景模式：多人会话]
+你正在群聊中，你需要扮演 ${cn} 中的一人或多人进行回复。禁止扮演用户。`;
 }
 
 const p = `[系统指令] 当前时间${t}。我们正在进行线上聊天。
