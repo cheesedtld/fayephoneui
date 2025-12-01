@@ -2028,12 +2028,11 @@ updateStatusBar('home');
 
 function updateClock() {
 let timeStr;
-if (appSettings.timeOffset) {
+// 只要 customTime 有值，就说明用户启用了自定义时间，此时应该使用 timeOffset (即使是 0)
+if (appSettings.customTime && /^\d{1,2}:\d{2}$/.test(appSettings.customTime) && typeof appSettings.timeOffset === 'number') {
     const now = new Date();
     const target = new Date(now.getTime() + appSettings.timeOffset);
     timeStr = `${target.getHours().toString().padStart(2,'0')}:${target.getMinutes().toString().padStart(2,'0')}`;
-} else if (appSettings.customTime && /^\d{1,2}:\d{2}$/.test(appSettings.customTime)) {
-    timeStr = appSettings.customTime;
 } else {
     const now = new Date();
     timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
@@ -2137,8 +2136,9 @@ function loadSettings() {
     appSettings.homeTextColor = globalSettings.homeTextColor;
     appSettings.homeBg = globalSettings.homeBg;
     appSettings.homeBgIsDark = globalSettings.homeBgIsDark;
-    // appSettings.customTime = globalSettings.customTime; // Allow per-character time
-    // appSettings.timeOffset = globalSettings.timeOffset; // Allow per-character time
+    appSettings.customTime = globalSettings.customTime;
+    appSettings.timeOffset = Number(globalSettings.timeOffset); // Ensure number type
+    if (isNaN(appSettings.timeOffset)) appSettings.timeOffset = 0;
 
     // 4. 其它兼容性处理
     if (typeof appSettings.blockChar === 'undefined' && typeof currentSettings.blockChar !== 'undefined') appSettings.blockChar = currentSettings.blockChar;
@@ -2336,7 +2336,33 @@ if (homeBgUrl && homeBgUrl !== window.location.href) {
 appSettings.homeBg = homeBgUrl;
 appSettings.homeBgIsDark = await analyzeImageBrightness(appSettings.homeBg);
 }
-saveSettingsToStorage(); applySettings(); closeSettings();
+
+// Save to current key
+saveSettingsToStorage(); 
+
+// Sync global fields to global storage (Ensure time/appearance settings persist across reloads)
+try {
+    let globalData = {};
+    try {
+        const raw = localStorage.getItem('st-phone-settings-global');
+        if (raw) globalData = JSON.parse(raw);
+    } catch(e) { console.error('Parse global settings error', e); }
+    
+    globalData.phoneWidth = appSettings.phoneWidth;
+    globalData.phoneHeight = appSettings.phoneHeight;
+    globalData.caseColor = appSettings.caseColor;
+    globalData.iconBg = appSettings.iconBg;
+    globalData.iconColor = appSettings.iconColor;
+    globalData.homeTextColor = appSettings.homeTextColor;
+    globalData.homeBg = appSettings.homeBg;
+    globalData.homeBgIsDark = appSettings.homeBgIsDark;
+    globalData.customTime = appSettings.customTime;
+    globalData.timeOffset = appSettings.timeOffset;
+    
+    localStorage.setItem('st-phone-settings-global', JSON.stringify(globalData));
+} catch(e) { console.error('Failed to sync global settings', e); }
+
+applySettings(); closeSettings();
 }
 
 function renderAvatarSettings() {
