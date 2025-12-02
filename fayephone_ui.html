@@ -495,7 +495,8 @@ max-width: 100%; height: 32px;
 .location-pin { width: 20px; height: 20px; fill: #ea4e3d; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); margin-bottom: 8px; }
 
 /* 转账卡片 */
-.transfer-card { background: #ffacac; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.transfer-card { background: #ffacac; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: background-color 0.3s; }
+.transfer-card.completed { background: #ffdbdb; }
 .transfer-top { padding: 12px; display: flex; align-items: center; gap: 10px; border-top-left-radius: 6px; border-top-right-radius: 6px; }
 .transfer-icon-circle { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .transfer-icon-circle svg { width: 20px; height: 20px; stroke: #fff; stroke-width: 2; fill: none; }
@@ -611,6 +612,146 @@ flex-shrink: 0; z-index: 10;
 #emoji-menu { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 12px; overflow-y: auto; box-sizing: border-box; align-content: flex-start; justify-items: center; }
 #emoji-menu.open { height: 220px; padding: 15px 12px; border-top: 1px solid #e5e5e5; }
 #emoji-menu::-webkit-scrollbar { display: none; }
+
+/* Quote Block */
+.msg-quote {
+    margin-bottom: 6px;
+    margin-top: 0;
+    padding: 8px 10px;
+    background-color: rgba(0,0,0,0.1);
+    border-radius: 6px;
+    font-size: 12px;
+    color: #555;
+    display: flex;
+    flex-direction: column;
+    /* border-left: 3px solid #b0b0b0; */
+    position: relative;
+    user-select: none;
+}
+.msg-quote-content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    line-height: 1.4;
+}
+
+/* Message Action Menu */
+.msg-action-menu {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05);
+    z-index: 1000;
+    animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-origin: center bottom;
+}
+.msg-action-menu.top {
+    transform-origin: center top;
+}
+.msg-action-menu::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -6px;
+    transform: translateX(-50%);
+    border-width: 6px 6px 0;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.95) transparent transparent transparent;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.05));
+}
+.msg-action-menu.top::after {
+    top: -6px;
+    bottom: auto;
+    border-width: 0 6px 6px;
+    border-color: transparent transparent rgba(255, 255, 255, 0.95) transparent;
+    filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.05));
+}
+.msg-action-item {
+    padding: 4px 8px;
+    cursor: pointer;
+    border-right: 1px solid rgba(0,0,0,0.06);
+    border-radius: 6px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.msg-action-item:last-child {
+    border-right: none;
+}
+.msg-action-item:active {
+    background-color: #f5f0f6;
+}
+.msg-action-icon {
+    width: 14px;
+    height: 14px;
+    display: block;
+    opacity: 0.7;
+    transition: opacity 0.2s, transform 0.2s;
+}
+.msg-action-item:active .msg-action-icon {
+    transform: scale(0.9);
+    opacity: 1;
+}
+
+/* Transfer Modal */
+.transfer-modal-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: transparent; z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.transfer-modal-overlay.visible { opacity: 1; pointer-events: auto; }
+.transfer-modal {
+    width: 280px; background: #ffffff; border-radius: 12px; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+.transfer-modal-overlay.visible .transfer-modal { transform: scale(1); }
+.transfer-header {
+    width: 100%; padding: 30px 0 20px; text-align: center; color: #333;
+    display: flex; flex-direction: column; align-items: center;
+}
+.transfer-icon-large {
+    width: 50px; height: 50px; background: #ffacac; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 10px;
+}
+.transfer-icon-large svg { width: 28px; height: 28px; stroke: #fff; stroke-width: 2; fill: none; }
+.transfer-desc { font-size: 14px; color: #666; margin-bottom: 5px; }
+.transfer-amount-large { font-size: 32px; font-weight: bold; color: #333; margin-bottom: 20px; }
+.transfer-actions {
+    width: 100%; padding: 0 20px 20px; box-sizing: border-box;
+    display: flex; flex-direction: row; gap: 10px; justify-content: center;
+}
+.transfer-btn {
+    flex: 1; padding: 12px; border: none; border-radius: 8px;
+    font-size: 15px; cursor: pointer; font-weight: 500; transition: opacity 0.2s;
+}
+.transfer-btn-receive { background: #ffeef5; color: #666; }
+.transfer-btn-return { background: #f0f0f0; color: #666; }
+.transfer-btn:active { opacity: 0.8; }
+.transfer-info-text {
+    width: 100%; text-align: center; color: #999; font-size: 14px;
+}
+.transfer-close {
+    position: absolute; top: 10px; right: 10px; color: #999;
+    font-size: 24px; cursor: pointer; padding: 5px; line-height: 1;
+    width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+}
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.8) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
 
 .action-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; color: #666; font-size: 12px; }
 .action-icon-box { width: 55px; height: 55px; background: #fff; border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1px solid #e5e5e5; }
@@ -896,6 +1037,17 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
         </div>
     </div>
 
+    <!-- 自定义CSS -->
+    <div>
+        <div class="settings-section-title">自定义CSS</div>
+        <div class="setting-group">
+            <style>
+                #set-custom-css::-webkit-scrollbar { display: none; }
+            </style>
+            <textarea id="set-custom-css" class="setting-input" style="height: 200px; font-family: monospace; font-size: 12px; width: 100%; box-sizing: border-box; border: none; resize: vertical; padding: 10px; outline: none; scrollbar-width: none; -ms-overflow-style: none;" placeholder="输入CSS代码..."></textarea>
+        </div>
+    </div>
+
     <!-- 系统 -->
     <div>
         <div class="settings-section-title">系统</div>
@@ -989,6 +1141,20 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 <div class="modal-actions"><button class="modal-btn btn-cancel" onclick="closeModal()">取消</button><button class="modal-btn btn-grey" id="modal-confirm-btn">发送</button></div>
 </div>
 </div>
+
+<div id="update-modal" class="modal-overlay">
+    <div class="modal-box" style="background: #fff0f5; border: 3px solid #ffb6c1; border-radius: 25px; box-shadow: 0 10px 30px rgba(255,182,193,0.4);">
+        <div class="modal-title" style="color: #ff69b4; font-family: 'Ma Shan Zheng', cursive; font-size: 22px;">🦋 更新啦 </div>
+        <style>
+            #update-content::-webkit-scrollbar { display: none; }
+        </style>
+        <div id="update-content" style="font-size: 14px; color: #888; line-height: 1.8; max-height: 300px; overflow-y: auto; text-align: left; padding: 15px; white-space: pre-wrap; background: rgba(255,255,255,0.6); border-radius: 15px; margin: 10px 0; scrollbar-width: none; -ms-overflow-style: none;"></div>
+        <div class="modal-actions">
+            <button class="modal-btn btn-grey" onclick="closeUpdateModal()" style="width: 100%; background: #ffb6c1; color: white; border: none; font-weight: bold; border-radius: 20px;">我知道啦</button>
+        </div>
+    </div>
+</div>
+
 <div id="add-contact-modal" class="modal-overlay">
 <div class="modal-box">
 <div class="modal-title">发起聊天</div>
@@ -1230,6 +1396,43 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 <script>
 (function() {
 // Global Variables
+const APP_VERSION = '20251203-3'; // 更新版本号
+const UPDATE_LOG = `【更新内容 v1.0.1】
+1. 新增自定义 CSS 功能：
+   - 在设置中可输入 CSS 代码，深度定制界面样式。
+   - 支持修改气泡圆角、背景等。
+2. 优化了转账功能：
+   - 支持 char 自动收款。
+   - 修复了转账状态重置的问题。
+3. 新增消息菜单栏
+   - user 消息可编辑、引用。
+   - char 消息可编辑、引用以及重新生成
+   - 重新生成是选定消息及以下的消息重新生成。
+4. 修复发图空行问题   `;
+
+function checkUpdate() {
+    const lastVersion = localStorage.getItem('faye-phone-version');
+    if (lastVersion !== APP_VERSION) {
+        showUpdateModal();
+        localStorage.setItem('faye-phone-version', APP_VERSION);
+    }
+}
+
+function showUpdateModal() {
+    const modal = document.getElementById('update-modal');
+    const content = document.getElementById('update-content');
+    if (modal && content) {
+        content.textContent = UPDATE_LOG;
+        modal.classList.add('show');
+    }
+}
+
+function closeUpdateModal() {
+    const modal = document.getElementById('update-modal');
+    if (modal) modal.classList.remove('show');
+}
+window.closeUpdateModal = closeUpdateModal; // Expose to window
+
 const defaultAppSettings = {
 charBubble: '#001C77', charText: '#C2C2C2', charAvatar: '',
 userBubble: '#016E8F', userText: '#C2C2C2', userAvatar: '',
@@ -1989,6 +2192,7 @@ document.getElementById('set-case-color').value = appSettings.caseColor;
 document.getElementById('set-icon-bg').value = appSettings.iconBg;
 document.getElementById('set-icon-color').value = appSettings.iconColor;
 document.getElementById('set-home-text-color').value = appSettings.homeTextColor;
+document.getElementById('set-custom-css').value = appSettings.customCss || '';
 
 // Calculate current custom time for display
 let displayTime = '';
@@ -2134,6 +2338,7 @@ function loadSettings() {
     appSettings.iconBg = globalSettings.iconBg;
     appSettings.iconColor = globalSettings.iconColor;
     appSettings.homeTextColor = globalSettings.homeTextColor;
+    appSettings.customCss = globalSettings.customCss;
     appSettings.homeBg = globalSettings.homeBg;
     appSettings.homeBgIsDark = globalSettings.homeBgIsDark;
     appSettings.customTime = globalSettings.customTime;
@@ -2294,6 +2499,15 @@ rootStyle.setProperty('--chat-btn-text', appSettings.chatBtnText || '#2ea0a0');
 // 手机宽度变量（用于计算气泡最大宽度），默认330px
 rootStyle.setProperty('--phone-width-px', ((appSettings.phoneWidth && !isNaN(appSettings.phoneWidth)) ? appSettings.phoneWidth : 330) + 'px');
 
+// Apply Custom CSS
+let styleTag = document.getElementById('custom-css-style');
+if (!styleTag) {
+    styleTag = document.createElement('style');
+    styleTag.id = 'custom-css-style';
+    document.head.appendChild(styleTag);
+}
+styleTag.textContent = appSettings.customCss || '';
+
 updateStatusBar('home'); loadInitialChat();
 }
 
@@ -2314,6 +2528,7 @@ appSettings.caseColor = document.getElementById('set-case-color').value;
 appSettings.iconBg = document.getElementById('set-icon-bg').value;
 appSettings.iconColor = document.getElementById('set-icon-color').value;
 appSettings.homeTextColor = document.getElementById('set-home-text-color').value;
+appSettings.customCss = document.getElementById('set-custom-css').value;
 
 const timeInput = document.getElementById('set-custom-time').value;
 if (timeInput && /^\d{1,2}:\d{2}$/.test(timeInput)) {
@@ -2331,10 +2546,22 @@ if (timeInput && /^\d{1,2}:\d{2}$/.test(timeInput)) {
     appSettings.customTime = '';
 }
 
+// 立即应用非异步的设置（如CSS），防止被图片分析阻塞
+applySettings();
+
 const homeBgUrl = document.getElementById('preview-home-bg').src;
 if (homeBgUrl && homeBgUrl !== window.location.href) {
-appSettings.homeBg = homeBgUrl;
-appSettings.homeBgIsDark = await analyzeImageBrightness(appSettings.homeBg);
+    appSettings.homeBg = homeBgUrl;
+    // 使用 Promise.race 防止 analyzeImageBrightness 卡死
+    try {
+        const brightnessPromise = analyzeImageBrightness(appSettings.homeBg);
+        const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 1000)); // 1秒超时
+        const result = await Promise.race([brightnessPromise, timeoutPromise]);
+        
+        if (result !== null) {
+            appSettings.homeBgIsDark = result;
+        }
+    } catch(e) { console.error('Image analysis failed', e); }
 }
 
 // Save to current key
@@ -2354,6 +2581,7 @@ try {
     globalData.iconBg = appSettings.iconBg;
     globalData.iconColor = appSettings.iconColor;
     globalData.homeTextColor = appSettings.homeTextColor;
+    globalData.customCss = appSettings.customCss;
     globalData.homeBg = appSettings.homeBg;
     globalData.homeBgIsDark = appSettings.homeBgIsDark;
     globalData.customTime = appSettings.customTime;
@@ -2649,7 +2877,14 @@ else if (type === 'camera') { if(videoInput) videoInput.click(); }
 
 function openModal(title, fields, confirmCallback) {
 modalTitle.textContent = title; modalInputsContainer.innerHTML = '';
-fields.forEach(field => { const input = document.createElement('input'); input.type = 'text'; input.className = 'modal-input'; input.placeholder = field.placeholder; modalInputsContainer.appendChild(input); });
+fields.forEach(field => { 
+    const input = document.createElement('input'); 
+    input.type = 'text'; 
+    input.className = 'modal-input'; 
+    input.placeholder = field.placeholder || ''; 
+    if (field.value) input.value = field.value;
+    modalInputsContainer.appendChild(input); 
+});
 currentConfirmAction = confirmCallback; modal.classList.add('show');
 }
 
@@ -2836,6 +3071,111 @@ function triggerLoveEffect() {
     }
 }
 
+function showTransferModal(amount, note, status, isUser, el) {
+    const existing = document.querySelector('.transfer-modal-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'transfer-modal-overlay';
+    
+    const modal = document.createElement('div');
+    modal.className = 'transfer-modal';
+    
+    const closeBtn = document.createElement('div');
+    closeBtn.className = 'transfer-close';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.onclick = () => { overlay.classList.remove('visible'); setTimeout(() => overlay.remove(), 300); };
+    
+    const header = document.createElement('div');
+    header.className = 'transfer-header';
+    
+    const icon = document.createElement('div');
+    icon.className = 'transfer-icon-large';
+    icon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M7 10h14l-4-4"></path><path d="M17 14H3l4 4"></path></svg>';
+    
+    const desc = document.createElement('div');
+    desc.className = 'transfer-desc';
+    desc.textContent = note;
+    
+    const amt = document.createElement('div');
+    amt.className = 'transfer-amount-large';
+    amt.textContent = amount;
+    
+    header.appendChild(icon);
+    header.appendChild(desc);
+    header.appendChild(amt);
+    
+    const actions = document.createElement('div');
+    actions.className = 'transfer-actions';
+    
+    if (status === 'pending') {
+        if (!isUser) {
+            const btnReceive = document.createElement('button');
+            btnReceive.className = 'transfer-btn transfer-btn-receive';
+            btnReceive.textContent = '确认收款';
+            btnReceive.onclick = () => {
+                el.querySelector('.transfer-bottom').textContent = '已收款';
+                el.classList.add('completed');
+                const newBody = `${amount}|${note}|received`;
+                el.dataset.rawBody = newBody;
+                overlay.classList.remove('visible'); setTimeout(() => overlay.remove(), 300);
+                
+                // Add system message
+                const myName = window.userName || '{{user}}';
+                const sysMsg = `[${myName}|转账已接收]`;
+                renderMessageToUI({ body: sysMsg, isUser: true });
+                
+                rebuildAndSaveHistory();
+                
+                // Update click handler to reflect new status
+                el.onclick = null;
+            };
+            
+            const btnReturn = document.createElement('button');
+            btnReturn.className = 'transfer-btn transfer-btn-return';
+            btnReturn.textContent = '立即退还';
+            btnReturn.onclick = () => {
+                el.querySelector('.transfer-bottom').textContent = '已退还';
+                el.classList.add('completed');
+                const newBody = `${amount}|${note}|returned`;
+                el.dataset.rawBody = newBody;
+                overlay.classList.remove('visible'); setTimeout(() => overlay.remove(), 300);
+                
+                // Add system message
+                const myName = window.userName || '{{user}}';
+                const sysMsg = `[${myName}|转账已退还]`;
+                renderMessageToUI({ body: sysMsg, isUser: true });
+
+                rebuildAndSaveHistory();
+                
+                // Update click handler
+                el.onclick = null;
+            };
+            
+            actions.appendChild(btnReturn);
+            actions.appendChild(btnReceive);
+        } else {
+            const info = document.createElement('div');
+            info.className = 'transfer-info-text';
+            info.textContent = '等待对方确认收款';
+            actions.appendChild(info);
+        }
+    } else {
+        const info = document.createElement('div');
+        info.className = 'transfer-info-text';
+        info.textContent = status === 'received' ? '已收款' : '已退还';
+        actions.appendChild(info);
+    }
+    
+    modal.appendChild(closeBtn);
+    modal.appendChild(header);
+    modal.appendChild(actions);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    requestAnimationFrame(() => overlay.classList.add('visible'));
+}
+
 function renderMessageToUI(msg) {
 if(!chatMessages) return;
 // 过滤掉暗网搜索记录和日记
@@ -2879,6 +3219,68 @@ if (currentChatTarget && !msg.isUser) {
     if (!isValid) return;
 }
 
+// NEW: 处理转账状态系统消息
+const transferStatusMatch = msg.body ? msg.body.match(/^\[(.*?)\|(转账已接收|转账已退还)\]$/) : null;
+if (transferStatusMatch) {
+    const row = document.createElement('div'); 
+    row.className = 'message-row system';
+    row.style.justifyContent = 'center';
+    row.style.margin = '10px 0';
+    
+    const el = document.createElement('div');
+    el.className = 'recall-notice'; // Reuse recall style
+    el.style.fontSize = '12px';
+    el.style.color = '#999';
+    el.style.backgroundColor = 'rgba(0,0,0,0.05)';
+    el.style.padding = '4px 12px';
+    el.style.borderRadius = '10px';
+    
+    const name = transferStatusMatch[1];
+    const action = transferStatusMatch[2] === '转账已接收' ? '接收了转账' : '退还了转账';
+    
+    el.textContent = `${name}${action}`;
+    el.dataset.rawBody = msg.body; // Keep original format
+    
+    if (msg.header) {
+        el.dataset.fullHeader = msg.header;
+    } else {
+        const n = msg.isUser ? (window.userName || '{{user}}') : (window.charName || '{{char}}');
+        const t = getTime();
+        el.dataset.fullHeader = `[${n}|${t}]`;
+    }
+    
+    row.appendChild(el);
+    chatMessages.appendChild(row);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Auto-update previous transfer card status
+    // Find the last transfer card sent by user that is pending
+    const transfers = Array.from(chatMessages.querySelectorAll('.transfer-card.sent'));
+    if (transfers.length > 0) {
+        const lastTransfer = transfers[transfers.length - 1];
+        const raw = lastTransfer.dataset.rawBody || '';
+        // Check if it's already processed
+        if (!raw.includes('|received') && !raw.includes('|returned')) {
+            const status = transferStatusMatch[2] === '转账已接收' ? 'received' : 'returned';
+            const statusText = status === 'received' ? '已收款' : '已退还';
+            
+            // Update UI
+            lastTransfer.querySelector('.transfer-bottom').textContent = statusText;
+            lastTransfer.classList.add('completed');
+            lastTransfer.onclick = null;
+            
+            // Update Data
+            const parts = raw.split('|');
+            // Ensure we have amount|note|status
+            const amount = parts[0] || '¥ 0.00';
+            const note = parts[1] || '转账给您';
+            lastTransfer.dataset.rawBody = `${amount}|${note}|${status}`;
+            
+        }
+    }
+
+    return;
+}
 
 // NEW: 处理撤回消息
 if (msg.header && msg.header.includes('|撤回|')) {
@@ -2988,6 +3390,9 @@ const thoughtMatch = displayBody.match(/^([\s\S]*?)\*([^\*]+)\*\s*$/);
 if (thoughtMatch) { displayBody = thoughtMatch[1].trim(); displayThought = thoughtMatch[2].trim(); }
 }
 
+// Save original body for history persistence
+const rawBodyForHistory = displayBody;
+
 // Auto-detect Pollinations AI images or Markdown images OR <img> tag images
 if (!isLoc && !isTra && !isFile && !isVoice && !isSticker && !isCallMsg) {
     if (/^!\[.*?\]\(.*?\)$/.test(displayBody) || 
@@ -3011,13 +3416,41 @@ if (isPhoto) {
     else if (imgTagMatch) displayBody = imgTagMatch[1];
 }
 
+// Quote Parsing
+let quoteHtml = '';
+const quoteRegex = /「`回复 (.*?)[：:](.*?)`」/;
+const quoteMatch = displayBody.match(quoteRegex);
+if (quoteMatch) {
+    const qName = quoteMatch[1];
+    const qText = quoteMatch[2];
+    // Remove quote from body
+    displayBody = displayBody.replace(quoteMatch[0], '').trim();
+    // Build Quote HTML
+    quoteHtml = `<div class="msg-quote"><div class="msg-quote-content"><span style="font-weight:bold">回复 ${qName}：</span>${qText}</div></div>`;
+}
+
 if (isLoc) {
 el = document.createElement('div'); el.className = `location-card ${msg.isUser ? 'sent' : 'received'}`;
 el.innerHTML = `<div class="location-info"><div class="location-name">${displayBody}</div></div><div class="location-map"><svg class="location-pin" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"></path><circle cx="12" cy="9" r="2.5" fill="#fff"/></svg></div>`;
 } else if (isTra) {
 const parts = displayBody.split('|');
+const amount = parts[0] || '¥ 0.00';
+const note = parts[1] || '转账给您';
+const status = parts[2] || 'pending';
+
 el = document.createElement('div'); el.className = `transfer-card ${msg.isUser ? 'sent' : 'received'}`;
-el.innerHTML = `<div class="transfer-top"><div class="transfer-icon-circle"><svg viewBox="0 0 24 24"><path d="M7 10h14l-4-4"></path><path d="M17 14H3l4 4"></path></svg></div><div class="transfer-content"><div class="transfer-amount">${parts[0]||'¥ 0.00'}</div><div class="transfer-note">${parts[1]||'转账给您'}</div></div></div><div class="transfer-bottom">转账</div>`;
+let statusText = '转账';
+if (status === 'received') { statusText = '已收款'; el.classList.add('completed'); }
+else if (status === 'returned') { statusText = '已退还'; el.classList.add('completed'); }
+
+el.innerHTML = `<div class="transfer-top"><div class="transfer-icon-circle"><svg viewBox="0 0 24 24"><path d="M7 10h14l-4-4"></path><path d="M17 14H3l4 4"></path></svg></div><div class="transfer-content"><div class="transfer-amount">${amount}</div><div class="transfer-note">${note}</div></div></div><div class="transfer-bottom">${statusText}</div>`;
+
+if (status === 'pending') {
+    el.onclick = (e) => {
+        if (document.querySelector('.msg-action-menu')) return;
+        showTransferModal(amount, note, status, msg.isUser, el);
+    };
+}
 } else if (isFile) {
 el = document.createElement('div'); el.className = `file-card ${msg.isUser ? 'sent' : 'received'}`;
 el.innerHTML = `<div class="file-info"><div class="file-name">${displayBody}</div><div class="file-size">128 KB</div></div><div class="file-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="#eee"></path><polyline points="14 2 14 8 20 8" fill="#ddd"></polyline><text x="50%" y="18" font-size="6" fill="#888" text-anchor="middle" font-family="Arial">FILE</text></svg></div>`;
@@ -3090,7 +3523,9 @@ el.innerHTML = `<img src="${displayBody}">`;
 if (msg.isUser) { el.style.backgroundColor = appSettings.userBubble; }
 else { el.style.backgroundColor = appSettings.charBubble; }
 } else {
-el = document.createElement('div'); el.className = `bubble ${msg.isUser ? 'bubble-sent' : 'bubble-received'}`; el.textContent = displayBody;
+el = document.createElement('div'); el.className = `bubble ${msg.isUser ? 'bubble-sent' : 'bubble-received'}`; 
+el.innerHTML = quoteHtml + displayBody.replace(/\n/g, '<br>');
+el.dataset.rawBody = rawBodyForHistory;
 if (msg.isUser) { el.style.backgroundColor = appSettings.userBubble; el.style.color = appSettings.userText; }
 else { el.style.backgroundColor = appSettings.charBubble; el.style.color = appSettings.charText; }
 }
@@ -3173,10 +3608,18 @@ try {
         const thoughtSuffix = thoughtEl ? `*${thoughtEl.textContent}*` : '';
         
         // ... (提取文本逻辑保持不变) ...
-        if (el.classList.contains('bubble')) t = el.textContent;
+        if (el.classList.contains('bubble')) t = el.dataset.rawBody || el.textContent;
         else if (el.classList.contains('recall-notice')) t = el.dataset.rawBody;
         else if (el.classList.contains('location-card')) t = el.querySelector('.location-name').textContent;
-        else if (el.classList.contains('transfer-card')) t = `${el.querySelector('.transfer-amount').textContent}|${el.querySelector('.transfer-note').textContent}`;
+        else if (el.classList.contains('transfer-card')) {
+            const amt = el.querySelector('.transfer-amount').textContent;
+            const note = el.querySelector('.transfer-note').textContent;
+            const statusText = el.querySelector('.transfer-bottom').textContent;
+            let status = 'pending';
+            if (statusText === '已收款') status = 'received';
+            else if (statusText === '已退还') status = 'returned';
+            t = `${amt}|${note}|${status}`;
+        }
         else if (el.classList.contains('file-card')) t = el.querySelector('.file-name').textContent;
         else if (el.classList.contains('voice-card')) t = `${el.querySelector('.voice-duration').textContent.replace('"','')}|${el.querySelector('.voice-text').textContent}`;
         else if (el.classList.contains('real-audio-card')) t = el.querySelector('audio').getAttribute('src');
@@ -3385,7 +3828,9 @@ const observer = new MutationObserver((mutations) => {
 function parseMessages(txt) {
 const lines = txt.split('\n'), res = [], dr = /^\d{1,2}月\d{1,2}日$/, hr = /^(\[([^\]]+)\]|【([^】]+)】)/, cn = window.charName || '{{char}}';
 for (const l of lines) {
-const tr = l.trim(); if (!tr) continue; if (dr.test(tr)) { res.push({ type: 'date', body: tr }); continue; }
+const tr = l.trim(); if (!tr) continue; 
+if (/^<img>\s*<\/img>$/.test(tr)) continue; // Filter empty img tags
+if (dr.test(tr)) { res.push({ type: 'date', body: tr }); continue; }
 const m = tr.match(hr);
 if (m) {
 const hc = m[2] || m[3];
@@ -3514,7 +3959,8 @@ const p = `[系统指令] 当前时间${t}。我们正在进行线上聊天。
     const p2 = `[样式强制]
 1. 格式：仅输出纯文本消息。禁止使用 Markdown、代码块或 XML 标签。
 2. 语气：休闲、对话式、短信风格。适当使用俚语/表情符号。
-3. 拉黑指令：如果你想拉黑用户，请在回复末尾加上 [拉黑用户]。如果你想解除拉黑，请加上 [解除拉黑]。`;
+3. 拉黑指令：如果你想拉黑用户，请在回复末尾加上 [拉黑用户]。如果你想解除拉黑，请加上 [解除拉黑]。
+4. 转账指令：如果用户给你转账，你可以回复 [${isGroup ? '你的名字' : cn}|转账已接收] 来收款，或 [${isGroup ? '你的名字' : cn}|转账已退还] 来退款。`;
     injects.push({ role: 'system', content: p2, position: 'at_depth', depth: 1 });
 
     // 3. 拉黑状态注入
@@ -3594,17 +4040,231 @@ function adjustTextareaHeight() {
 }
 function clearDeleteButton() { if (activeDeleteBtn) { activeDeleteBtn.remove(); activeDeleteBtn = null; } document.querySelectorAll('.delete-mode').forEach(el => el.classList.remove('delete-mode')); }
 function executeDelete(el) { const r = el.closest('.message-row'); r.style.transform = 'scale(0)'; setTimeout(async () => { r.remove(); clearDeleteButton(); await rebuildAndSaveHistory(); }, 200); }
-function addLongPressHandler(el) {
-let timer; const start = (e) => { if(e.target.closest('.delete-btn')) return; el.classList.add('pressing'); timer = setTimeout(() => { el.classList.remove('pressing'); showDeleteButton(el); }, 500); };
-const cancel = () => { clearTimeout(timer); el.classList.remove('pressing'); };
-el.addEventListener('mousedown', start);
-el.addEventListener('touchstart', start, {passive:true});
-['mouseup','mouseleave','touchend','touchmove'].forEach(ev => el.addEventListener(ev, cancel));
+// Global variable for active menu
+let activeMsgMenu = null;
+
+function closeMsgMenu() {
+    if (activeMsgMenu) {
+        activeMsgMenu.remove();
+        activeMsgMenu = null;
+    }
+    document.querySelectorAll('.pressing').forEach(el => el.classList.remove('pressing'));
 }
+
+function addLongPressHandler(el) {
+    let timer;
+    const start = (e) => {
+        if(e.target.closest('.delete-btn') || e.target.closest('.msg-action-menu')) return;
+        el.classList.add('pressing');
+        timer = setTimeout(() => {
+            // el.classList.remove('pressing'); // Keep pressing state while menu is open
+            showMessageActionMenu(el);
+        }, 500);
+    };
+    const cancel = () => {
+        clearTimeout(timer);
+        if (!activeMsgMenu) el.classList.remove('pressing');
+    };
+    
+    el.addEventListener('mousedown', start);
+    el.addEventListener('touchstart', start, {passive:true});
+    ['mouseup','mouseleave','touchend','touchmove'].forEach(ev => el.addEventListener(ev, cancel));
+}
+
+function showMessageActionMenu(el) {
+    closeMsgMenu(); // Close existing
+    closeMenus(); // Close other menus like emoji/plus
+    
+    // Get message data
+    const row = el.closest('.message-row');
+    const isUser = row.classList.contains('sent');
+    // const isLast = row === chatMessages.lastElementChild;
+    const isAi = !isUser;
+    
+    // Create Menu
+    const menu = document.createElement('div');
+    menu.className = 'msg-action-menu';
+    
+    // Delete
+    const btnDelete = document.createElement('div');
+    btnDelete.className = 'msg-action-item';
+    btnDelete.innerHTML = '<img src="https://api.iconify.design/carbon:delete.svg" class="msg-action-icon">';
+    btnDelete.onclick = (e) => { e.stopPropagation(); executeDelete(el); closeMsgMenu(); };
+    menu.appendChild(btnDelete);
+    
+    // Quote
+    const btnQuote = document.createElement('div');
+    btnQuote.className = 'msg-action-item';
+    btnQuote.innerHTML = '<img src="https://api.iconify.design/streamline:quotation-2.svg" class="msg-action-icon">';
+    btnQuote.onclick = (e) => { e.stopPropagation(); executeQuote(el); closeMsgMenu(); };
+    menu.appendChild(btnQuote);
+
+    // Edit
+    const btnEdit = document.createElement('div');
+    btnEdit.className = 'msg-action-item';
+    btnEdit.innerHTML = '<img src="https://api.iconify.design/hugeicons:pencil-edit-02.svg" class="msg-action-icon">';
+    btnEdit.onclick = (e) => { e.stopPropagation(); executeEdit(el); closeMsgMenu(); };
+    menu.appendChild(btnEdit);
+    
+    // Regenerate (Only for AI messages)
+    if (isAi) {
+        const btnRegen = document.createElement('div');
+        btnRegen.className = 'msg-action-item';
+        btnRegen.innerHTML = '<img src="https://api.iconify.design/system-uicons:reset-alt.svg" class="msg-action-icon">';
+        btnRegen.onclick = (e) => { e.stopPropagation(); executeRegenerate(el); closeMsgMenu(); };
+        menu.appendChild(btnRegen);
+    }
+    
+    document.getElementById('chat-screen').appendChild(menu);
+    activeMsgMenu = menu;
+    
+    // Position
+    const rect = el.getBoundingClientRect();
+    const screenRect = document.getElementById('chat-screen').getBoundingClientRect();
+    
+    // Default top (above bubble)
+    let top = rect.top - screenRect.top - menu.offsetHeight - 5; 
+    let left = rect.left - screenRect.left + (rect.width / 2) - (menu.offsetWidth / 2);
+    
+    // Adjust if too close to top
+    if (top < 60) { 
+        top = rect.bottom - screenRect.top + 10;
+        menu.classList.add('top'); 
+    }
+    
+    // Adjust horizontal
+    if (left < 10) left = 10;
+    if (left + menu.offsetWidth > screenRect.width) left = screenRect.width - menu.offsetWidth - 10;
+    
+    menu.style.top = top + 'px';
+    menu.style.left = left + 'px';
+    
+    // Click outside to close
+    setTimeout(() => {
+        const closeHandler = (e) => {
+            if (!menu.contains(e.target)) {
+                closeMsgMenu();
+                document.removeEventListener('click', closeHandler);
+            }
+        };
+        document.addEventListener('click', closeHandler);
+    }, 0);
+}
+
+function executeQuote(el) {
+    let text = '';
+    if (el.classList.contains('bubble')) text = el.textContent;
+    else if (el.dataset.fullHeader) {
+        text = el.textContent || '[媒体消息]';
+    }
+    
+    const row = el.closest('.message-row');
+    const nameEl = row.querySelector('.msg-name');
+    const name = nameEl ? nameEl.textContent : '对方';
+    
+    // 使用反引号包裹引用内容，以便渲染时识别
+    const quoteText = `「\`回复 ${name}：${text}\`」`;
+    const input = document.getElementById('message-input');
+    input.value = quoteText + input.value;
+    input.focus();
+    adjustTextareaHeight();
+}
+
+function executeRegenerate(el) {
+    const row = el.closest('.message-row');
+    if (!row) return;
+
+    // Identify all subsequent message rows (Regenerate from here)
+    const rowsToDelete = [row];
+    let next = row.nextElementSibling;
+    while(next) {
+        if (next.classList.contains('message-row')) {
+            rowsToDelete.push(next);
+        }
+        next = next.nextElementSibling;
+    }
+
+    // Animate
+    rowsToDelete.forEach(r => r.style.transform = 'scale(0)');
+
+    setTimeout(async () => {
+        rowsToDelete.forEach(r => r.remove());
+        await rebuildAndSaveHistory();
+        
+        showTypingIndicator();
+        triggerGenerate();
+    }, 200);
+}
+
+function executeEdit(el) {
+    let currentText = '';
+    
+    if (el.classList.contains('bubble')) {
+        currentText = el.dataset.rawBody || el.textContent;
+    } else if (el.classList.contains('location-card')) {
+        currentText = el.querySelector('.location-name').textContent;
+    } else if (el.classList.contains('transfer-card')) {
+        currentText = el.querySelector('.transfer-amount').textContent + '|' + el.querySelector('.transfer-note').textContent;
+    } else if (el.classList.contains('file-card')) {
+        currentText = el.querySelector('.file-name').textContent;
+    } else if (el.classList.contains('voice-card')) {
+        currentText = el.querySelector('.voice-duration').textContent.replace('"','') + '|' + el.querySelector('.voice-text').textContent;
+    } else if (el.classList.contains('photo-card') || el.classList.contains('sticker-bubble')) {
+         const img = el.querySelector('img');
+         if(img) currentText = img.src;
+    }
+
+    openModal('编辑消息', [{ placeholder: '输入新内容', value: currentText }], async (values) => {
+        const newText = values[0];
+        if (newText === undefined) return;
+        
+        if (el.classList.contains('bubble')) {
+            // Re-parse quote logic
+            const quoteRegex = /「`回复 (.*?)[：:](.*?)`」/;
+            const quoteMatch = newText.match(quoteRegex);
+            let displayBody = newText;
+            let quoteHtml = '';
+            
+            if (quoteMatch) {
+                const qName = quoteMatch[1];
+                const qText = quoteMatch[2];
+                displayBody = displayBody.replace(quoteMatch[0], '').trim();
+                quoteHtml = `<div class="msg-quote"><div class="msg-quote-content"><span style="font-weight:bold">回复 ${qName}：</span>${qText}</div></div>`;
+            }
+            
+            el.innerHTML = quoteHtml + displayBody.replace(/\n/g, '<br>');
+            el.dataset.rawBody = newText;
+        } else if (el.classList.contains('location-card')) {
+            el.querySelector('.location-name').textContent = newText;
+        } else if (el.classList.contains('file-card')) {
+            el.querySelector('.file-name').textContent = newText;
+        } else if (el.classList.contains('transfer-card')) {
+            const parts = newText.split('|');
+            if(parts[0]) el.querySelector('.transfer-amount').textContent = parts[0];
+            if(parts[1]) el.querySelector('.transfer-note').textContent = parts[1] || '';
+        } else if (el.classList.contains('voice-card')) {
+             const parts = newText.split('|');
+             const dur = parts[0] || '1';
+             const txt = parts.slice(1).join('|');
+             el.querySelector('.voice-duration').textContent = dur + '"';
+             el.querySelector('.voice-text').textContent = txt;
+             // Recalculate width
+             const minWidth = 66; 
+             const phoneW = (appSettings.phoneWidth && !isNaN(appSettings.phoneWidth)) ? parseInt(appSettings.phoneWidth) : 330;
+             const maxWidth = phoneW * 0.65; 
+             const width = Math.round(minWidth + (maxWidth - minWidth) * (Math.min(45, parseInt(dur)||1) / 45));
+             el.style.width = width + 'px';
+        } else if (el.classList.contains('photo-card') || el.classList.contains('sticker-bubble')) {
+             const img = el.querySelector('img');
+             if(img) img.src = newText;
+        }
+        
+        await rebuildAndSaveHistory();
+    });
+}
+
 function showDeleteButton(el) {
-clearDeleteButton(); el.classList.add('delete-mode'); const btn = document.createElement('div'); btn.className = 'delete-btn';
-btn.innerHTML = `<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
-btn.onclick = (e) => { e.stopPropagation(); executeDelete(el); }; el.appendChild(btn); activeDeleteBtn = btn;
+    showMessageActionMenu(el);
 }
 document.onclick = (e) => {
     if(activeDeleteBtn && !e.target.closest('.location-card, .transfer-card, .file-card, .bubble, .voice-card, .real-audio-card, .photo-card, .sticker-bubble')) clearDeleteButton();
@@ -3620,6 +4280,10 @@ document.onclick = (e) => {
     }
     if (emojiMenu && emojiMenu.classList.contains('open') && !e.target.closest('#emoji-menu') && !e.target.closest('#emoji-button')) {
         closeMenus();
+    }
+    
+    if (activeMsgMenu && !e.target.closest('.msg-action-menu')) {
+        closeMsgMenu();
     }
 };
 
@@ -3831,6 +4495,7 @@ setInterval(updateClock, 1000);
 checkCharacterChange();
 setInterval(checkCharacterChange, 1000);
 try { loadInitialChat(); setTimeout(loadInitialChat, 500); } catch(e){}
+checkUpdate(); // Check for updates
 }
 
 // Attach globally
