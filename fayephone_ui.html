@@ -1396,19 +1396,9 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 <script>
 (function() {
 // Global Variables
-const APP_VERSION = '20251203-3'; // 更新版本号
-const UPDATE_LOG = `【更新内容 v1.0.1】
-1. 新增自定义 CSS 功能：
-   - 在设置中可输入 CSS 代码，深度定制界面样式。
-   - 支持修改气泡圆角、背景等。
-2. 优化了转账功能：
-   - 支持 char 自动收款。
-   - 修复了转账状态重置的问题。
-3. 新增消息菜单栏
-   - user 消息可编辑、引用。
-   - char 消息可编辑、引用以及重新生成
-   - 重新生成是选定消息及以下的消息重新生成。
-4. 修复发图空行问题   `;
+const APP_VERSION = '20251203-4'; // 更新版本号
+const UPDATE_LOG = `【更新内容 v1.0.2】
+1. 新增流式输出样式，体验更真实的打字效果`;
 
 function checkUpdate() {
     const lastVersion = localStorage.getItem('faye-phone-version');
@@ -3699,8 +3689,199 @@ try {
 if (typeof eventOn !== 'undefined') {
 const removeTyping = () => { const tb = document.getElementById('typing-bubble'); if (tb) tb.remove(); };
 
-eventOn(iframe_events.GENERATION_ENDED, (resp) => {
+let streamingRows = [];
+let streamingCallBubble = null;
+
+// 流式控制变量
+let streamTargetText = "";
+let streamCurrentText = "";
+let streamTimer = null;
+let pendingEndResponse = null;
+const STREAM_SPEED = 200; // 200ms = 5 chars/sec
+
+function renderStreamingText(text) {
+    const msgs = parseMessages(text);
+
+    if (isCalling) {
+        hideCallTyping();
+        const container = document.getElementById('call-chat-container');
+        if (!container) return;
+        
+        const aiMsgs = msgs.filter(m => !m.isUser);
+        if (aiMsgs.length > 0) {
+            const lastMsg = aiMsgs[aiMsgs.length - 1];
+            if (!streamingCallBubble) {
+                streamingCallBubble = document.createElement('div');
+                streamingCallBubble.className = 'call-bubble received';
+                streamingCallBubble.style.opacity = '0.8';
+                container.appendChild(streamingCallBubble);
+            }
+            streamingCallBubble.textContent = lastMsg.body;
+            container.scrollTop = container.scrollHeight;
+        }
+        return;
+    }
+
+    streamingRows.forEach(row => row.remove());
+    streamingRows = [];
+
+    msgs.forEach((msg, index) => {
+        if (msg.isUser) return;
+
+        const row = document.createElement('div');
+        row.className = 'message-row received';
+        
+        const avatar = document.createElement('img');
+        avatar.className = 'avatar';
+        
+        let displayName = window.charName || '{{char}}';
+        if (msg.header) {
+            const parts = msg.header.replace(/^\[|\]$|^【|】$/g, '').split('|');
+            if (parts.length > 0) displayName = parts[0];
+        }
+        
+        let avatarSrc = appSettings.charAvatar;
+        if (appSettings.memberAvatars && appSettings.memberAvatars[displayName]) {
+            avatarSrc = appSettings.memberAvatars[displayName];
+        }
+        avatar.src = avatarSrc;
+
+        const container = document.createElement('div');
+        container.className = 'msg-container';
+        
+        const nameEl = document.createElement('div');
+        nameEl.className = 'msg-name';
+        nameEl.textContent = displayName;
+        container.appendChild(nameEl);
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'msg-wrapper';
+        
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble bubble-received';
+        bubble.style.backgroundColor = appSettings.charBubble;
+        bubble.style.color = appSettings.charText;
+        
+        if (index === msgs.length - 1) {
+            bubble.style.opacity = '0.8';
+        }
+        
+        let displayBody = msg.body;
+        const quoteRegex = /「`回复 (.*?)[：:](.*?)`」/;
+        const quoteMatch = displayBody.match(quoteRegex);
+        let quoteHtml = '';
+        if (quoteMatch) {
+            displayBody = displayBody.replace(quoteMatch[0], '').trim();
+            quoteHtml = `<div class="msg-quote"><div class="msg-quote-content"><span style="font-weight:bold">回复 ${quoteMatch[1]}：</span>${quoteMatch[2]}</div></div>`;
+        }
+        
+        bubble.innerHTML = quoteHtml + displayBody.replace(/\n/g, '<br>');
+        
+        wrapper.appendChild(bubble);
+        container.appendChild(wrapper);
+        
+        if (msg.thought) {
+            const thoughtEl = document.createElement('div');
+            thoughtEl.className = 'msg-thought';
+            thoughtEl.textContent = msg.thought;
+            container.appendChild(thoughtEl);
+        }
+
+        row.appendChild(avatar);
+        row.appendChild(container);
+        
+        chatMessages.appendChild(row);
+        streamingRows.push(row);
+    });
+    
+    if (streamingRows.length > 0) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+}
+
+function processStreamingBuffer() {
+    // 如果当前显示内容还没追上目标内容
+    if (streamCurrentText.length < streamTargetText.length) {
+        const currentIndex = streamCurrentText.length;
+        const nextChar = streamTargetText[currentIndex];
+        
+        // Header 快速显示逻辑：
+        // 如果遇到 '[' 或 '【'，且后面能找到闭合的 ']' 或 '】'，则一次性显示整个 Header
+        // 这样避免 Header 逐字显示导致的 UI 跳变
+        if (nextChar === '[' || nextChar === '【') {
+            let closeIndex = -1;
+            // 向后查找闭合括号
+            for (let i = currentIndex; i < streamTargetText.length; i++) {
+                const c = streamTargetText[i];
+                if (c === ']' || c === '】') {
+                    closeIndex = i;
+                    break;
+                }
+                if (c === '\n') break; // Header 不应跨行
+            }
+            
+            if (closeIndex !== -1) {
+                // 找到了闭合，直接跳到闭合处
+                streamCurrentText = streamTargetText.substring(0, closeIndex + 1);
+            } else {
+                // 没找到闭合（可能还没生成完），暂停显示，等待更多 token
+                // 这样用户会看到暂停，直到 Header 生成完毕瞬间显示
+                return; 
+            }
+        } else {
+            // 普通字符，逐字增加
+            streamCurrentText += nextChar;
+        }
+        
+        renderStreamingText(streamCurrentText);
+    } else {
+        // 已追上目标
+        if (pendingEndResponse) {
+            // 如果有待处理的结束事件，说明生成已完成且播放已完成
+            clearInterval(streamTimer);
+            streamTimer = null;
+            finishGeneration(pendingEndResponse);
+            pendingEndResponse = null;
+        }
+    }
+}
+
+eventOn(iframe_events.STREAM_TOKEN_RECEIVED_FULLY, (text) => {
     removeTyping();
+    if (isWaitingForDarkSearch || isWaitingForDiary) return;
+
+    streamTargetText = text;
+    
+    if (!streamTimer) {
+        streamTimer = setInterval(processStreamingBuffer, STREAM_SPEED);
+        // 立即执行一次
+        processStreamingBuffer();
+    }
+});
+
+eventOn(iframe_events.GENERATION_ENDED, (resp) => {
+    // 暂存结束响应，不立即执行，等待流式播放完毕
+    let rt = typeof resp === 'string' ? resp : (resp.text || '');
+    streamTargetText = rt; // 确保目标是最终完整文本
+    pendingEndResponse = resp;
+    
+    // 确保定时器在运行（防止生成极快导致没触发 STREAM 事件）
+    if (!streamTimer) {
+        streamTimer = setInterval(processStreamingBuffer, STREAM_SPEED);
+    }
+});
+
+function finishGeneration(resp) {
+    removeTyping();
+    // 清理流式状态
+    streamingRows.forEach(row => row.remove());
+    streamingRows = [];
+    if (streamingCallBubble) { streamingCallBubble.remove(); streamingCallBubble = null; }
+    
+    // 重置流式变量
+    streamTargetText = "";
+    streamCurrentText = "";
+
     let rt = typeof resp === 'string' ? resp : (resp.text || '');
 
     // 1. 处理特殊模式 (暗网/日记) - 优先处理并返回，避免渲染到聊天窗口
@@ -3809,7 +3990,7 @@ eventOn(iframe_events.GENERATION_ENDED, (resp) => {
     // 过滤掉 AI 生成结果中可能包含的用户消息，防止重复显示
     parseMessages(rt).filter(msg => !msg.isUser).forEach(msg => renderMessageToUI(msg)); 
     rebuildAndSaveHistory().then(() => renderMessageList());
-});
+}
 
 eventOn(iframe_events.GENERATION_STOPPED, removeTyping);
 } else {
@@ -4001,7 +4182,7 @@ const p = `[系统指令] 当前时间${t}。我们正在进行线上聊天。
 
     const genParams = { 
         injects: injects, 
-        should_stream: false, 
+        should_stream: true, 
         max_chat_history: 300 
     };
 
