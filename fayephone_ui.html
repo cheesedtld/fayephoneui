@@ -480,7 +480,7 @@ font-size: 10px; color: var(--msg-time-color); line-height: 1; user-select: none
 .voice-card.received { border-top-left-radius: 0px; }
 .voice-card:active { opacity: 0.8; }
 .voice-bar { 
-    display: flex; align-items: center; gap: 6px; height: 28px; padding: 7px 7px; margin: 0; 
+    display: flex; align-items: center; gap: 6px; height: 30px; padding: 7px 10px; margin: 0; 
     background: inherit;
     color: inherit;
     border-radius: inherit;
@@ -1433,11 +1433,11 @@ border-radius: 50%; margin: 0 2px; animation: typing 1.4s infinite ease-in-out b
 <script>
 (function() {
 // Global Variables
-const APP_VERSION = '20251220-2'; // 更新版本号
+const APP_VERSION = '20251220-3'; // 更新版本号
 const UPDATE_LOG = `【更新内容 v1.1.0】
 1. 内置“日光之匣”预设核心规则，无需手动加载酒馆预设。
 2. 优化底层生成逻辑，忽略酒馆当前预设，确保角色扮演风格一致性。
-3. 优化语音气泡美化。`;
+3. 优化语音消息气泡样式`;
 
 function checkUpdate() {
     const lastVersion = localStorage.getItem('faye-phone-version');
@@ -3529,10 +3529,10 @@ el.innerHTML = `<div class="file-info"><div class="file-name">${displayBody}</di
         voiceCard.style.width = width + 'px';
         voiceCard.style.cursor = 'pointer';
         
-        // 声纹3~5根
+        // 声纹3~4根
         let waves = '';
-        const barCount = 4 + Math.floor(Math.random()*2); // 4或5根
-        for (let i = 0; i < barCount; i++) waves += `<div class="wave" style="height:${8 + Math.random()*20}px"></div>`;
+        const barCount = 3 + Math.floor(Math.random()*2); // 3或4根
+        for (let i = 0; i < barCount; i++) waves += `<div class="wave" style="height:${6 + Math.random()*14}px"></div>`;
         let barHtml = '';
         if (msg.isUser) {
             // user: 声纹在右，时长在左
